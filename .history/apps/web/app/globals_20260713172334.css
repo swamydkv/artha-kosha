@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f8fafc; color: #0f172a; }
+a { color: #2563eb; text-decoration: none; }
+input, button { font: inherit; }
+input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+button { padding: 10px 14px; border: 0; border-radius: 6px; background: #0f172a; color: white; cursor: pointer; }

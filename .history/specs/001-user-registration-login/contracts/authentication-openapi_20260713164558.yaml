@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: ArthaKosha Authentication API
+  version: 1.0.0
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '409':
+          description: Duplicate field conflict
+        '400':
+          description: Validation error
+
+  /login:
+    post:
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+
+  /logout:
+    post:
+      summary: End a user session
+      responses:
+        '200':
+          description: Logout successful
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - full_name
+        - date_of_birth
+        - mobile_number
+        - email
+        - username
+        - password
+        - confirm_password
+      properties:
+        full_name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        mobile_number:
+          type: string
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        confirm_password:
+          type: string
+          format: password
+
+    RegisterResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        welcome_message:
+          type: string
