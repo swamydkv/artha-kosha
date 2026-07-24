@@ -18,6 +18,7 @@ services:
     environment:
       PORT: "8080"
       FINANCE_API_ALLOWED_ORIGINS: "http://localhost:3000"
+      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/artha_kosha?sslmode=disable"
     ports:
       - "8080:8080"
     depends_on:

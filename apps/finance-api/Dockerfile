@@ -12,8 +12,9 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application and migrator
 RUN CGO_ENABLED=0 GOOS=linux go build -o finance-api ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -o migrate ./cmd/migrate
 
 # Runtime stage
 FROM alpine:latest
@@ -22,11 +23,13 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-# Copy the binary from builder
+# Copy the binaries from builder
 COPY --from=builder /workspace/finance-api .
+COPY --from=builder /workspace/migrate .
+COPY migrations ./migrations
 
 # Expose port
 EXPOSE 8080
 
-# Run the application
-CMD ["./finance-api"]
+# Run migrations and then start the application
+CMD ./migrate ./migrations && ./finance-api
