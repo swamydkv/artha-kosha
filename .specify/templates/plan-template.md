@@ -40,7 +40,52 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Specification First
+✅ Feature specification exists and is approved (spec.md)
+
+### Test-Driven Development
+✅ Feature specification includes acceptance criteria, will generate tasks before implementation
+
+### OpenAPI-First Development
+✅ OpenAPI specification is defined for all REST API endpoints
+
+### Database-First Design
+✅ Feature specification includes database schema requirements for persistent data
+
+### ACID Transactions
+✅ Feature specification mandates ACID transactions for financial operations
+
+### Financial Data Integrity
+✅ Feature specification maintains integer minor units for money (if applicable)
+
+### Modular Monolith Architecture
+✅ Implementation follows modular monolith pattern within single application
+
+### PostgreSQL-Only Data Access
+✅ Uses PostgreSQL with pgx driver, no ORM frameworks
+
+### Security and User Authorization
+✅ Implements secure password hashing (Argon2id), proper session management, and authorization
+✅ Authentication abstraction layer implemented for future OIDC integration
+✅ Custom authentication acceptable for current phase per constitution (OIDC planned for production)
+
+### Session Management
+✅ Implements persistent database sessions with HttpOnly cookies, sliding expiration, and session validation per constitutional requirements
+
+### Observability and Audit Logging
+✅ Implements structured logging with correlation IDs, audit events, and comprehensive observability per constitutional requirements
+
+### AI-Assisted Development
+✅ AI assisting with specification and planning, human review required
+
+### Repository Organization
+✅ Follows established repository structure (apps/, specs/, infra/, docs/)
+
+### Technology Standards
+✅ Follows constitutional technology standards (Go 1.26+, PostgreSQL, REST API, Docker Compose, etc.)
+
+### Development Workflow
+✅ Following specification-driven workflow with Mermaid diagrams in spec
 
 ## Project Structure
 

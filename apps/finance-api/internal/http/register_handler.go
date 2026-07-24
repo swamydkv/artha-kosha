@@ -36,9 +36,9 @@ func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Determine status code based on error
 		statusCode := http.StatusBadRequest
-		if err.Error() == "username already exists" || 
-		   err.Error() == "email already exists" || 
-		   err.Error() == "mobile number already exists" {
+		if err.Error() == "username already exists" ||
+			err.Error() == "email already exists" ||
+			err.Error() == "mobile number already exists" {
 			statusCode = http.StatusConflict
 		}
 		http.Error(w, err.Error(), statusCode)

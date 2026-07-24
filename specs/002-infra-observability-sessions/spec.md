@@ -1,0 +1,449 @@
+# Feature Specification: Infrastructure Modernization and Observability
+
+**Feature Branch**: `[002-infra-observability-sessions]`
+
+**Created**: 2026-07-14
+
+**Status**: Draft
+
+**Input**: User description: "Updates to existing infra, observability, session handling"
+
+## Clarifications
+
+### Session 2026-07-14
+
+- Q: What should be the default session timeout duration, and should the session use sliding expiration (timeout resets on activity) or absolute expiration (fixed lifetime from creation)? → A: Sliding expiration with 15-minute inactivity timeout and 8-hour absolute maximum lifetime
+- Q: What should be the maximum number of concurrent active sessions allowed per user? → A: Maximum 5 concurrent sessions per user
+
+### Session 2026-07-15
+
+- Q: Is API versioning required for the authentication and session management endpoints? → A: No API versioning required. Current APIs (/register, /login, /logout) will be retained and enhanced. New session management endpoints (/session, /sessions) will be added without versioning. Backend and frontend are developed together with no public API consumers, so breaking changes will be handled internally.
+
+## User Scenarios & Testing *(mandatory)*
+
+### User Story 1 - Robust Session Management (Priority: P1)
+
+As a user, I need my login sessions to be managed securely and reliably, so that I can remain authenticated across browser sessions and can log out from all devices when needed.
+
+**Why this priority**: Session management is fundamental to the user experience and security. Without reliable sessions, users cannot effectively use the application, and security vulnerabilities could expose user data.
+
+**Independent Test**: Users can log in, refresh the page, and remain authenticated. Users can explicitly log out and be fully signed out. System can handle multiple concurrent sessions from different devices.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user is logged in, **When** they refresh the page, **Then** they remain authenticated without having to log in again
+2. **Given** a user is logged in on multiple devices, **When** they log out from one device, **Then** they are logged out from that device but remain logged in on other devices
+3. **Given** a user's session has expired, **When** they attempt to access a protected resource, **Then** they are redirected to the login page
+4. **Given** a user is logged in, **When** they explicitly click logout, **Then** their session is immediately terminated and they cannot access protected resources
+
+---
+
+### User Story 2 - Secure Authentication (Priority: P1)
+
+As a user, I need my password to be stored and verified using industry-standard security practices, so that my account remains protected even if the database is compromised.
+
+**Why this priority**: Security is foundational to a financial application. Weak password hashing could lead to catastrophic security breaches and loss of user trust.
+
+**Independent Test**: Users can register and log in with strong passwords. The system prevents common attack vectors against password storage.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user registers with a password, **When** the password is stored, **Then** it is hashed using a secure algorithm (Argon2id) with proper salting
+2. **Given** a user logs in with correct credentials, **When** they submit their password, **Then** they are successfully authenticated
+3. **Given** a user logs in with incorrect credentials, **When** they submit their password, **Then** authentication fails without revealing whether the username or password was incorrect
+4. **Given** a user changes their password, **When** the change is processed, **Then** the old password hash is invalidated and the new password is securely hashed
+
+---
+
+### User Story 3 - Reliable API Operations (Priority: P1)
+
+As a user, I need all API operations to complete reliably and consistently, so that my financial data is never left in an inconsistent state due to system failures.
+
+**Why this priority**: Financial data integrity is critical. Partial updates or inconsistent data could lead to incorrect financial records and user distrust.
+
+**Independent Test**: Users can perform financial operations (create accounts, record transactions) and be confident that either the entire operation succeeds or fails atomically. System can recover from failures without data corruption.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user creates a new account, **When** the creation process starts, **Then** the account is either fully created with all required data or not created at all
+2. **Given** a user records a transaction, **When** the database operation fails partway through, **Then** no partial data is persisted and the user receives a clear error message
+3. **Given** a user performs multiple related operations, **When** any operation fails, **Then** all related operations are rolled back to maintain consistency
+4. **Given** the system experiences a temporary failure, **When** it recovers, **Then** all data remains consistent and no operations are partially applied
+
+---
+
+### User Story 4 - Comprehensive System Observability (Priority: P2)
+
+As a system administrator, I need comprehensive logging and observability, so that I can quickly diagnose issues, track system health, and ensure security incidents are properly recorded.
+
+**Why this priority**: Observability is essential for operating a production system. Without proper logging and monitoring, issues cannot be diagnosed efficiently, and security incidents cannot be properly investigated.
+
+**Independent Test**: System administrators can access structured logs that contain all relevant context (request IDs, user IDs, timestamps). Audit events are recorded for all significant operations. Issues can be traced through log correlation.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user performs any significant operation, **When** the operation completes, **Then** an audit event is recorded with all relevant context (user, action, resource, timestamp)
+2. **Given** an error occurs in the system, **When** the error is logged, **Then** the log entry contains request ID, correlation ID, user ID, and detailed error information
+3. **Given** a user makes an API request, **When** the request is processed, **Then** all log entries for that request share the same correlation ID for easy tracing
+4. **Given** a security incident occurs, **When** investigators review the logs, **Then** they can trace the complete sequence of events with full context
+
+---
+
+### User Story 5 - Cross-Origin Resource Sharing (Priority: P2)
+
+As a frontend developer, I need proper CORS configuration, so that the web application can communicate with the API without browser security restrictions.
+
+**Why this priority**: CORS misconfiguration prevents the frontend from communicating with the backend, breaking the entire application. Proper CORS is essential for the web client to function.
+
+**Independent Test**: The web application can successfully make API requests from the configured frontend domain. Preflight requests are handled correctly without 405 errors.
+
+**Acceptance Scenarios**:
+
+1. **Given** the web application is running on the configured domain, **When** it makes an API request, **Then** the request succeeds without CORS errors
+2. **Given** the web application makes a preflight OPTIONS request, **When** the server responds, **Then** the response has appropriate CORS headers and a 200 status code
+3. **Given** an unauthorized domain attempts to make API requests, **When** the request is made, **Then** it is rejected by CORS policy
+4. **Given** the application is deployed to production, **When** the frontend domain changes, **Then** CORS configuration can be updated without code changes
+
+---
+
+### User Story 6 - Event-Based System Integration (Priority: P3)
+
+As a system architect, I need domain events to be reliably captured and stored, so that future features (reporting, notifications, forecasting) can consume them without modifying core business logic.
+
+**Why this priority**: While not immediately user-visible, event-based architecture enables future features and integrations. Implementing it now prevents architectural debt and makes future enhancements easier.
+
+**Independent Test**: Domain events are generated for all state-changing operations and stored reliably in the outbox. Events can be consumed by future consumers without affecting core business logic.
+
+**Acceptance Scenarios**:
+
+1. **Given** a user performs a state-changing operation (e.g., creates a transaction), **When** the operation completes, **Then** a corresponding domain event is written to the outbox within the same transaction
+2. **Given** the system generates a domain event, **When** the transaction commits, **Then** the event is guaranteed to be persisted
+3. **Given** a transaction fails and rolls back, **When** the rollback occurs, **Then** no domain event is persisted for the failed operation
+4. **Given** events are stored in the outbox, **When** a future consumer processes them, **Then** events are processed exactly once in order
+
+---
+
+### Edge Cases
+
+1. **Given** a user's session expires while they are actively using the application, **When** they attempt to perform an action, **Then** the system redirects them to the login page with a session expired message
+2. **Given** a database connection failure occurs during authentication, **When** the operation fails, **Then** the system returns a clear error message without revealing system details and logs the incident for investigation
+3. **Given** a user attempts to log in from a new device while already at the session limit (5 sessions), **When** the login request is processed, **Then** the system denies the new login with a clear session limit message and offers to revoke existing sessions
+4. **Given** concurrent login attempts from the same user occur simultaneously, **When** the requests are processed, **Then** the system handles them sequentially without creating duplicate sessions and returns appropriate responses
+5. **Given** the audit event storage becomes unavailable, **When** an operation attempts to write an audit event, **Then** the system logs the failure but does not block the business operation, with a fallback mechanism for event storage
+6. **Given** a malformed or malicious CORS request is received, **When** the request is evaluated, **Then** the system rejects it with appropriate CORS headers without processing the request body
+7. **Given** domain event processing fails after the transaction has committed, **When** the failure occurs, **Then** the system marks the event as failed and implements retry logic with exponential backoff
+8. **Given** a password hash verification timing attack is attempted, **When** multiple invalid password attempts occur, **Then** the system maintains constant-time comparison regardless of validity and implements rate limiting
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+#### Session Management
+- **FR-001**: System MUST store user sessions in a persistent database with session ID, user ID, creation timestamp, last activity timestamp, expiration timestamp, revocation timestamp, user agent, and optional IP address
+- **FR-002**: System MUST support up to 5 concurrent active sessions per user
+- **FR-003**: System MUST validate session status on every authenticated request
+- **FR-004**: System MUST automatically expire sessions after 15 minutes of inactivity (sliding expiration) with an absolute maximum lifetime of 8 hours from creation
+- **FR-005**: System MUST allow users to explicitly logout and revoke their current session
+- **FR-006**: System MUST allow users to revoke all their sessions across all devices
+- **FR-007**: System MUST use secure HttpOnly cookies for web client session management
+- **FR-008**: System MUST NOT store authentication state in browser localStorage
+
+#### Authentication Security
+- **FR-009**: System MUST hash user passwords using a modern, memory-hard hashing algorithm with secure random salts
+- **FR-010**: System MUST use constant-time comparison for password verification to prevent timing attacks
+- **FR-011**: System MUST NOT use fast hashing algorithms vulnerable to brute force attacks for password storage
+- **FR-012**: System MUST keep authentication behind an abstraction layer to support future migration to external identity providers
+- **FR-013**: System MUST invalidate old password hashes when users change their passwords
+
+#### Data Consistency
+- **FR-014**: System MUST execute all related write operations within ACID transactions
+- **FR-015**: System MUST rollback entire transaction when any operation within it fails
+- **FR-016**: System MUST prevent partial updates that could leave data in inconsistent state
+- **FR-017**: System MUST use transactions for user registration, login session creation, account creation, expense recording, income recording, transfers, budget creation, audit event creation, and transactional outbox creation
+- **FR-018**: System MUST allow explicit corrections that are auditable and never leave inconsistent data
+
+#### Observability and Logging
+- **FR-019**: System MUST use structured logging with consistent log levels and formats
+- **FR-020**: System MUST include timestamp, log level, service, component, module, operation, request ID, correlation ID, user ID, session ID, duration, and message in every log entry
+- **FR-021**: System MUST assign a unique request ID to every incoming request
+- **FR-022**: System MUST assign a correlation ID to every request and propagate it through all operations
+- **FR-023**: System MUST return request ID in API responses where appropriate
+- **FR-024**: System MUST NEVER log passwords, tokens, secrets, hashes, or vault values
+- **FR-025**: System MUST write all log entries to standard output/error streams for platform-managed rotation
+
+#### Audit Events
+- **FR-026**: System MUST generate an immutable audit event for every successful business operation
+- **FR-027**: System MUST store audit events in a persistent database with event ID, request ID, user ID, session ID, resource, resource ID, action, result, timestamp, user agent, and client IP
+- **FR-028**: System MUST ensure audit records are append-only and never modified
+- **FR-029**: System MUST generate audit events for user registration, login, logout, account creation, transaction creation, budget creation, and any data modifications
+
+#### Domain Events
+- **FR-030**: System MUST generate a domain event for every state-changing business operation
+- **FR-031**: System MUST write domain events to a transactional outbox within the same database transaction as the business operation
+- **FR-032**: System MUST ensure domain events are written atomically with the business operation
+- **FR-033**: System MUST support domain events for USER_REGISTERED, USER_LOGGED_IN, USER_LOGGED_OUT, ACCOUNT_CREATED, TRANSACTION_CREATED, and BUDGET_CREATED
+
+#### HTTP Routing and CORS
+- **FR-034**: System MUST use a capable HTTP router that supports middleware chains and proper request handling
+- **FR-035**: System MUST use standard CORS middleware for cross-origin request handling
+- **FR-036**: System MUST respond to OPTIONS preflight requests with appropriate CORS headers and never return 405 status
+- **FR-037**: System MUST support configurable CORS origins through application configuration
+- **FR-038**: System MUST allow GET, POST, PUT, PATCH, DELETE, and OPTIONS methods
+- **FR-039**: System MUST allow Content-Type, Authorization, X-Request-ID, X-Correlation-ID, and X-Session-ID headers
+- **FR-040**: System MUST expose X-Request-ID and X-Correlation-ID headers in responses
+- **FR-041**: System MUST support credentials in CORS requests
+- **FR-042**: System MUST apply middleware in order: Recovery, Request ID, Structured Logging, Timeout, CORS, Authentication, Authorization, Router
+
+#### Repository Layer
+- **FR-043**: System MUST implement database repositories using type-safe SQL query generation
+- **FR-044**: System MUST NOT use in-memory repositories for production data access
+- **FR-045**: System MUST execute repository tests against a database running in containerized infrastructure
+- **FR-046**: System MUST provide complete repository implementations without placeholder code
+
+### Key Entities
+
+- **Session**: Represents a user authentication session with session ID, user ID, creation timestamp, last activity timestamp, expiration timestamp, revocation timestamp, user agent, IP address, and session status
+- **Audit Event**: Represents an immutable record of a business operation with event ID, request ID, user ID, session ID, resource, resource ID, action, result, timestamp, user agent, and client IP
+- **Domain Event**: Represents a state change in the system with event type, aggregate ID, event data, timestamp, and processing status
+- **Transactional Outbox**: Represents a reliable event delivery mechanism with event ID, event type, payload, creation timestamp, processing status, and retry count
+
+## System Design & Flow Documentation *(mandatory)*
+
+### Architecture Diagram
+
+```mermaid
+flowchart LR
+    subgraph Client["Web Client"]
+        UI["User Interface"]
+        Cookies["HttpOnly Session Cookies"]
+    end
+
+    subgraph API["API Layer"]
+        MW1["Recovery Middleware"]
+        MW2["Request ID Middleware"]
+        MW3["Structured Logging"]
+        MW4["Timeout Middleware"]
+        MW5["CORS Middleware"]
+        MW6["Authentication Middleware"]
+        MW7["Authorization Middleware"]
+        Router["HTTP Router"]
+        Handlers["HTTP Handlers"]
+    end
+
+    subgraph Services["Service Layer"]
+        AuthService["Authentication Service"]
+        SessionService["Session Service"]
+        AuditService["Audit Service"]
+        DomainEventService["Domain Event Service"]
+    end
+
+    subgraph Repositories["Repository Layer"]
+        UserRepo["User Repository"]
+        SessionRepo["Session Repository"]
+        AuditRepo["Audit Repository"]
+        OutboxRepo["Outbox Repository"]
+    end
+
+    subgraph Database["Persistent Database"]
+        Users[(Users Table)]
+        Sessions[(Sessions Table)]
+        AuditEvents[(Audit Events Table)]
+        Outbox[(Transactional Outbox Table)]
+    end
+
+    UI -->|"Session Cookie"| Cookies
+    UI -->|"HTTP Request with Headers"| MW1
+    MW1 --> MW2
+    MW2 --> MW3
+    MW3 --> MW4
+    MW4 --> MW5
+    MW5 --> MW6
+    MW6 --> MW7
+    MW7 --> Router
+    Router --> Handlers
+    Handlers --> AuthService
+    Handlers --> SessionService
+    Handlers --> AuditService
+    Handlers --> DomainEventService
+
+    AuthService --> UserRepo
+    SessionService --> SessionRepo
+    AuditService --> AuditRepo
+    DomainEventService --> OutboxRepo
+
+    UserRepo --> Users
+    SessionRepo --> Sessions
+    AuditRepo --> AuditEvents
+    OutboxRepo --> Outbox
+
+    Cookies -->|"Session ID"| MW6
+    MW6 -->|"Validate Session"| SessionService
+```
+
+### User Flow Diagram - Session Management
+
+```mermaid
+flowchart TD
+    S([User Login]) --> A[Enter Credentials]
+    A --> B[Submit Login Request]
+    B --> C{Credentials Valid?}
+    C -->|No| D[Show Error Message]
+    D --> A
+    C -->|Yes| E[Create Session in Database]
+    E --> F[Set HttpOnly Cookie]
+    F --> G[Redirect to Dashboard]
+    G --> H[User Refreshes Page]
+    H --> I{Session Valid?}
+    I -->|No| J[Redirect to Login]
+    I -->|Yes| K[Update Last Activity]
+    K --> L[Display Dashboard]
+    L --> M[User Clicks Logout]
+    M --> N[Revoke Session in Database]
+    N --> O[Clear Cookie]
+    O --> P[Redirect to Login]
+```
+
+### User Flow Diagram - Authentication Security
+
+```mermaid
+flowchart TD
+    S([User Registration]) --> A[Enter Username and Password]
+    A --> B[Submit Registration]
+    B --> C[Hash Password with Argon2id]
+    C --> D[Store User with Hashed Password]
+    D --> E[Create Session]
+    E --> F[Set HttpOnly Cookie]
+    F --> G[Registration Complete]
+
+    H([User Login]) --> I[Enter Username and Password]
+    I --> J[Submit Login]
+    J --> K[Retrieve User Hash]
+    K --> L[Constant-Time Password Compare]
+    L --> M{Password Match?}
+    M -->|No| N[Show Generic Error]
+    N --> I
+    M -->|Yes| O[Create Session]
+    O --> P[Set HttpOnly Cookie]
+    P --> Q[Login Complete]
+```
+
+### Call Flow Diagram - Login with Session Management
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Web Client
+    participant API as API Layer
+    participant Auth as Auth Service
+    participant Session as Session Service
+    participant Audit as Audit Service
+    participant DB as PostgreSQL
+
+    User->>UI: Enter credentials
+    UI->>API: POST /api/v1/auth/login
+    API->>API: Generate Request ID & Correlation ID
+    API->>Auth: Validate credentials
+    Auth->>DB: Retrieve user by username
+    DB-->>Auth: User record with password hash
+    Auth->>Auth: Constant-time password comparison
+    Auth-->>API: Authentication result
+
+    alt Credentials Valid
+        API->>Session: Create session
+        Session->>DB: Insert session record
+        DB-->>Session: Session ID
+        Session-->>API: Session ID
+
+        API->>Audit: Create audit event
+        Audit->>DB: Insert audit event
+        DB-->>Audit: Event ID
+
+        API->>API: Generate domain event
+        API->>DB: Insert USER_LOGGED_IN event to outbox
+        DB-->>API: Event ID
+
+        API-->>UI: Set HttpOnly cookie with Session ID
+        API-->>UI: Return success with Request ID
+        UI->>User: Redirect to dashboard
+    else Credentials Invalid
+        API->>Audit: Create failed login audit event
+        Audit->>DB: Insert audit event
+        DB-->>Audit: Event ID
+        API-->>UI: Return 401 with generic error
+        UI->>User: Show error message
+    end
+```
+
+### Call Flow Diagram - Transaction with Outbox Pattern
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Web Client
+    participant API as API Layer
+    participant Service as Business Service
+    participant DB as PostgreSQL
+
+    User->>UI: Create transaction
+    UI->>API: POST /api/v1/transactions
+    API->>API: Begin Transaction
+    API->>Service: Process transaction
+    Service->>DB: Insert transaction record
+    DB-->>Service: Transaction ID
+
+    Service->>DB: Insert audit event
+    DB-->>Service: Audit Event ID
+
+    Service->>DB: Insert domain event to outbox
+    DB-->>Service: Outbox Event ID
+
+    Service-->>API: Operation result
+    API->>API: Commit Transaction
+
+    alt Transaction Committed
+        API->>API: Generate success response
+        API-->>UI: Return success with Request ID
+        UI->>User: Show confirmation
+    else Transaction Failed
+        API->>API: Rollback Transaction
+        API->>API: No events persisted
+        API-->>UI: Return error with Request ID
+        UI->>User: Show error message
+    end
+```
+
+### Documentation Finalization Rule
+
+- The final architecture and supporting design notes MUST be written to the `docs/` directory only after the feature implementation has stabilized.
+- The feature specification MUST show the exact user flow and call flow for the feature using Mermaid diagrams, not just prose describing the intent.
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: Users can successfully log in and maintain their session across page refreshes in under 2 seconds
+- **SC-002**: System can handle 1,000 concurrent authenticated users without session validation errors
+- **SC-003**: 100% of user password data is stored using modern memory-hard hashing with proper salting
+- **SC-004**: 100% of financial operations complete atomically with no partial updates or data inconsistencies
+- **SC-005**: 100% of significant business operations generate immutable audit events with complete context
+- **SC-006**: 100% of API requests include request IDs and correlation IDs for traceability
+- **SC-007**: 100% of preflight CORS requests return appropriate headers with 200 status code (no 405 errors)
+- **SC-008**: 100% of state-changing operations generate domain events stored in the transactional outbox
+- **SC-009**: All log entries contain required fields (timestamp, level, service, component, operation, request ID, correlation ID, user ID, session ID, duration, message)
+- **SC-010**: Zero instances of sensitive data (passwords, tokens, secrets) appear in log files
+- **SC-011**: System administrators can trace any user request end-to-end using correlation IDs in under 5 minutes
+- **SC-012**: Security investigators can reconstruct complete user activity sequences from audit logs for any 24-hour period
+- **SC-013**: Sessions expire after 15 minutes of inactivity and are invalidated after 8 hours maximum lifetime
+
+## Assumptions
+
+- PostgreSQL is already configured and accessible for the application
+- The existing user registration and login functionality will be refactored to use the new session management system
+- HashiCorp Vault is available for secret management (or will be configured as part of implementation)
+- The web frontend is already configured to work with HttpOnly cookies
+- Session expiration uses 15-minute inactivity timeout with 8-hour absolute maximum lifetime per FR-004
+- Argon2id parameters (time cost, memory cost, parallelism) will be configured according to OWASP recommendations
+- CORS configuration will initially support localhost:3000 for development and be configurable for production
+- Domain event consumers will be implemented in future features; the outbox pattern ensures events are available when needed
+- Repository tests will use a dedicated test database instance running in Docker Compose
+- The existing authentication system architecture can be refactored to support the abstraction layer requirement without breaking existing functionality

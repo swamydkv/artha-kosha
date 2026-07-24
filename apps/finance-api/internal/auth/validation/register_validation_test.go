@@ -306,7 +306,7 @@ func TestRegistrationValidation_DateOfBirth(t *testing.T) {
 				DateOfBirth:     tt.dateOfBirth,
 				MobileNumber:    "+1234567890",
 				Email:           "user_" + tt.name + "@example.com", // Use unique email per test
-				Username:        "testuser123", // Use valid username for DOB tests
+				Username:        "testuser123",                      // Use valid username for DOB tests
 				Password:        "Password123!",
 				ConfirmPassword: "Password123!",
 			}

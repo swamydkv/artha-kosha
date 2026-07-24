@@ -98,6 +98,22 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Session Management Requirements *(mandatory for authentication features)*
+
+- **FR-XXX**: System MUST use HttpOnly cookies for web client session management
+- **FR-XXX**: System MUST NOT store authentication state in browser localStorage
+- **FR-XXX**: System MUST implement sliding session expiration with configurable timeout
+- **FR-XXX**: System MUST validate session status on every authenticated request
+- **FR-XXX**: System MUST support session revocation (single device and all devices)
+
+### Observability and Audit Logging Requirements *(mandatory for all features)*
+
+- **FR-XXX**: System MUST implement structured logging with consistent log levels and formats
+- **FR-XXX**: System MUST include timestamp, level, service, component, operation, request ID, correlation ID, user ID, session ID, duration, and message in every log entry
+- **FR-XXX**: System MUST assign unique request IDs and correlation IDs to every request
+- **FR-XXX**: System MUST generate immutable audit events for every successful business operation
+- **FR-XXX**: System MUST NEVER log passwords, tokens, secrets, hashes, or vault values
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]

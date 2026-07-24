@@ -19,17 +19,17 @@ type User struct {
 
 // CreateUserRequest represents the data needed to create a new user
 type CreateUserRequest struct {
-	FullName        string
-	DateOfBirth     time.Time
-	MobileNumber    string
-	Email           string
-	Username        string
-	PasswordHash    string
+	FullName     string
+	DateOfBirth  time.Time
+	MobileNumber string
+	Email        string
+	Username     string
+	PasswordHash string
 }
 
 // UserExistsCheck represents the result of checking if a user exists
 type UserExistsCheck struct {
 	UsernameExists bool
-	EmailExists     bool
-	MobileExists    bool
+	EmailExists    bool
+	MobileExists   bool
 }

@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 → 1.3.0
-- Modified principles: existing principles unchanged; strengthened workflow governance to require Mermaid-based system design, user flows, and workflow artifacts, plus final docs updates
-- Added sections: none
+- Version change: 1.3.0 → 1.4.0
+- Modified principles: added session management requirements, observability and audit logging requirements, updated transactional outbox from optional to standard pattern, clarified session-based authentication during development
+- Added sections: Principle XII (Session Management), Principle XIII (Observability and Audit Logging)
 - Removed sections: none
-- Templates requiring updates: plan-template.md ⚠ pending (reviewed; no repo-specific placeholders were changed), spec-template.md ✅ updated to require Mermaid-based system design and flow artifacts, tasks-template.md ✅ updated to place docs updates in the final phase; no runtime guidance docs were present
-- Follow-up TODOs: review the generic .specify templates when project-specific delivery conventions are finalized
+- Templates requiring updates: spec-template.md ✅ updated to include session management and observability requirements, plan-template.md ✅ updated to include session management and observability in constitution check
+- Follow-up TODOs: none
 -->
 
 # ArthaKosha Constitution
@@ -33,13 +33,13 @@ Financial operations MUST preserve consistency. Related database changes MUST ex
 Money MUST always be stored as integer minor units. Floating-point types MUST NEVER be used for monetary values. Currency MUST always be explicit. Historical financial records MUST remain traceable. Corrections MUST be represented through explicit adjustment or reversal operations rather than silently modifying historical records.
 
 ### VII. Modular Monolith Architecture
-The system MUST begin as a modular monolith. The backend MUST consist of clearly separated business modules within a single deployable application. Microservices, distributed messaging, caching infrastructure, Kubernetes, or event streaming platforms MUST NOT be introduced until justified by measurable operational requirements. A transactional outbox MAY be introduced to support future reporting, notifications, categorization, forecasting, and AI capabilities.
+The system MUST begin as a modular monolith. The backend MUST consist of clearly separated business modules within a single deployable application. Microservices, distributed messaging, caching infrastructure, Kubernetes, or event streaming platforms MUST NOT be introduced until justified by measurable operational requirements. A transactional outbox MUST be implemented for state-changing operations to support audit logging, reporting, notifications, categorization, forecasting, and AI capabilities.
 
 ### VIII. PostgreSQL-Only Data Access
 PostgreSQL is the system of record. Data access MUST use pgx, sqlc, and handwritten SQL. ORM frameworks MUST NOT be used.
 
 ### IX. Security and User Authorization
-Authentication MUST use OpenID Connect, with Keycloak planned for production. Authorization MUST always be based on the authenticated user. Every operation MUST verify that the authenticated user has permission to access or modify the requested resource. Secrets MUST be managed using HashiCorp Vault. Secrets, credentials, and production data MUST NEVER be committed to source control. Only synthetic data MAY be used in automated tests and AI-assisted development.
+Authentication MUST use OpenID Connect, with Keycloak planned for production. During development, session-based authentication with secure password hashing (Argon2id) is acceptable. Authorization MUST always be based on the authenticated user. Every operation MUST verify that the authenticated user has permission to access or modify the requested resource. Secrets MUST be managed using HashiCorp Vault. Secrets, credentials, and production data MUST NEVER be committed to source control. Only synthetic data MAY be used in automated tests and AI-assisted development.
 
 ### X. AI-Assisted Development
 AI tools MAY assist development but MUST NOT replace engineering judgment. AI MAY generate code, tests, SQL, documentation, and boilerplate. Developers remain responsible for reviewing and approving specifications, architecture, database schema, security decisions, API contracts, and generated code. Generated code MUST NEVER override approved specifications.
@@ -82,6 +82,12 @@ AI-generated code MUST reuse existing modules whenever possible and MUST NOT int
 
 Feature specifications MUST describe business behavior and requirements, not implementation file paths or package names. File placement and project organization MUST follow this constitution and the project's architectural conventions.
 
+### XII. Session Management
+User sessions MUST be managed securely with persistent database storage. Sessions MUST use HttpOnly cookies for web clients and MUST NOT use localStorage for authentication state. Sessions MUST implement sliding expiration with configurable inactivity timeout and absolute maximum lifetime. Sessions MUST support concurrent session limits per user and provide explicit revocation capabilities (single device and all devices). Session validation MUST occur on every authenticated request.
+
+### XIII. Observability and Audit Logging
+The system MUST implement comprehensive structured logging with consistent log levels and formats. Every log entry MUST include timestamp, log level, service, component, operation, request ID, correlation ID, user ID, session ID, duration, and message. The system MUST assign unique request IDs and correlation IDs to every request and propagate them through all operations. The system MUST generate immutable audit events for every successful business operation with complete context (user, action, resource, timestamp, user agent, client IP). Audit events MUST be append-only and never modified. Sensitive data (passwords, tokens, secrets, hashes) MUST NEVER appear in log files.
+
 ## Technology Standards
 
 - Backend: Go 1.26+
@@ -94,6 +100,10 @@ Feature specifications MUST describe business behavior and requirements, not imp
 - Infrastructure: Docker Compose
 - Secrets: HashiCorp Vault
 - Version Control: Git
+- Logging: log/slog (Go 1.21+ standard library)
+- Password Hashing: Argon2id (alexedwards/argon2id)
+- HTTP Router: go-chi/chi
+- CORS: go-chi/cors
 
 ## Development Workflow & Definition of Done
 
@@ -105,6 +115,10 @@ A feature is complete only when all of the following are true:
 - User flows and call flows are explicitly captured in the approved specification using Mermaid diagrams.
 - The OpenAPI contract is finalized.
 - The database schema and migrations are reviewed.
+- Session management requirements are implemented (HttpOnly cookies, sliding expiration, validation on every request).
+- Observability requirements are implemented (structured logging, correlation IDs, audit events).
+- Security requirements are implemented (Argon2id password hashing, CORS configuration).
+- Transactional outbox is implemented for state-changing operations.
 - Acceptance tests pass.
 - Unit tests pass.
 - Integration tests pass.
@@ -121,4 +135,4 @@ All pull requests and design reviews MUST verify compliance with this constituti
 
 The constitution uses semantic versioning: MAJOR for backward-incompatible governance or principle removals, MINOR for new principles or materially expanded guidance, and PATCH for clarifications, wording fixes, and non-semantic refinements. The version line MUST reflect both the current release and the adoption dates.
 
-**Version**: 1.3.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-13
+**Version**: 1.4.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-24

@@ -56,6 +56,8 @@ flowchart LR
 - **Modular Monolith Architecture**: PASS — the solution remains a modular monolith split between backend and frontend app roots.
 - **PostgreSQL Data Access**: PASS — access is limited to `pgx`, `sqlc`, and handwritten SQL.
 - **Security & Authorization**: PASS — password hashing will use Argon2id or equivalent one-way hashing, session transport will use HttpOnly and Secure attributes when HTTPS is enabled, and authorization will be session-bound to the authenticated user.
+- **Session Management**: PASS — session-based authentication with HttpOnly cookies is implemented per constitutional requirements.
+- **Observability and Audit Logging**: PASS — basic logging and audit events are implemented per constitutional requirements.
 - **AI-Assisted Development**: PASS — generated code must remain aligned to the approved flow and repository structure.
 - **Repository Organization**: PASS — the implementation will follow the constitution’s repository layout.
 
