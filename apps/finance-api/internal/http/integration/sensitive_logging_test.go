@@ -3,17 +3,17 @@ package integration
 import (
 	"bytes"
 	"context"
-	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"artha-kosha/apps/finance-api/internal/auth"
 	"artha-kosha/apps/finance-api/internal/audit"
+	"artha-kosha/apps/finance-api/internal/auth"
 	router "artha-kosha/apps/finance-api/internal/http"
 )
 
 type mockAudit struct{}
+
 func (m *mockAudit) Insert(ctx context.Context, e audit.AuditEvent) error { return nil }
 
 func TestSensitiveDataLoggingPrevention(t *testing.T) {
@@ -24,10 +24,10 @@ func TestSensitiveDataLoggingPrevention(t *testing.T) {
 	// Suppose mw.LoggingMiddleware takes a logger or writes to standard output, we'd mock it.
 	// For this test, we just ensure the router initializes properly and does not crash,
 	// and simulate a login request with sensitive data to ensure it is handled correctly.
-	
+
 	provider := auth.NewLocalAuthProvider()
 	mockAuditRepo := &mockAudit{}
-	
+
 	r := router.NewRouter(provider, mockAuditRepo)
 
 	reqBody := `{"username":"test_user", "password":"VerySecretPassword123!"}`

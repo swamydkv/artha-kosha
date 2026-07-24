@@ -2,9 +2,9 @@ package integration
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
-	"database/sql"
 
 	"artha-kosha/apps/finance-api/internal/domain"
 )
@@ -32,7 +32,7 @@ func TestDomainEventGeneration(t *testing.T) {
 	if evt.EventType != "TEST_EVENT" {
 		t.Error("Event type mismatch")
 	}
-	
+
 	// Real integration would test db insertion in domain_events table
 	_ = svc
 }

@@ -24,9 +24,6 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Project initialization and dependency updates
 
-- [ ] T001 Add Go dependencies for structured logging, CORS, password hashing, and router in `apps/finance-api/go.mod` (log/slog is stdlib, add: go-chi/chi v5.3.0, go-chi/cors v1.2.0, alexedwards/argon2id v0.0.0-20230722164332)
-- [ ] T002 [P] Update HTTP router configuration to use go-chi/chi in `apps/finance-api/internal/http/router.go`
-- [ ] T003 [P] Update linting configuration for new dependencies in `apps/finance-api/.golangci.yml`
  - [X] T001 Add Go dependencies for structured logging, CORS, password hashing, and router in `apps/finance-api/go.mod` (log/slog is stdlib, add: go-chi/chi v5.3.0, go-chi/cors v1.2.0, alexedwards/argon2id v0.0.0-20230722164332)
  - [X] T002 [P] Update HTTP router configuration to use go-chi/chi in `apps/finance-api/internal/http/router.go`
  - [X] T003 [P] Update linting configuration for new dependencies in `apps/finance-api/.golangci.yml`
@@ -39,21 +36,11 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Create PostgreSQL migration for enum types in `apps/finance-api/migrations/003_create_enum_types.sql` (session_status, audit_result, domain_event_type, processing_status)
-- [ ] T005 [P] Create PostgreSQL migration for domain_events table in `apps/finance-api/migrations/004_create_domain_events_table.sql`
-- [ ] T006 [P] Create PostgreSQL migration for transactional_outbox table in `apps/finance-api/migrations/005_create_transactional_outbox_table.sql`
-- [ ] T007 [P] Create PostgreSQL migration for sessions table in `apps/finance-api/migrations/006_create_sessions_table.sql`
-- [ ] T008 [P] Create PostgreSQL migration for audit_events table in `apps/finance-api/migrations/007_create_audit_events_table.sql`
  - [X] T004 Create PostgreSQL migration for enum types in `apps/finance-api/migrations/003_create_enum_types.sql` (session_status, audit_result, domain_event_type, processing_status)
  - [X] T005 [P] Create PostgreSQL migration for domain_events table in `apps/finance-api/migrations/004_create_domain_events_table.sql`
  - [X] T006 [P] Create PostgreSQL migration for transactional_outbox table in `apps/finance-api/migrations/005_create_transactional_outbox_table.sql`
  - [X] T007 [P] Create PostgreSQL migration for sessions table in `apps/finance-api/migrations/006_create_sessions_table.sql`
  - [X] T008 [P] Create PostgreSQL migration for audit_events table in `apps/finance-api/migrations/007_create_audit_events_table.sql`
-- [ ] T009 Create sqlc configuration for new tables in `apps/finance-api/sqlc.yaml`
-- [ ] T010 [P] Create sqlc query definitions for sessions in `apps/finance-api/sql/sessions.sql`
-- [ ] T011 [P] Create sqlc query definitions for audit_events in `apps/finance-api/sql/audit_events.sql`
-- [ ] T012 [P] Create sqlc query definitions for domain_events in `apps/finance-api/sql/domain_events.sql`
-- [ ] T013 [P] Create sqlc query definitions for transactional_outbox in `apps/finance-api/sql/transactional_outbox.sql`
  - [X] T009 Create sqlc configuration for new tables in `apps/finance-api/sqlc.yaml`
  - [X] T010 [P] Create sqlc query definitions for sessions in `apps/finance-api/sql/sessions.sql`
  - [X] T011 [P] Create sqlc query definitions for audit_events in `apps/finance-api/sql/audit_events.sql`
@@ -123,27 +110,17 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T045 [P] [US2] Add unit test for Argon2id password hashing in `apps/finance-api/internal/auth/security_test.go`
-- [ ] T046 [P] [US2] Add unit test for constant-time password comparison in `apps/finance-api/internal/auth/security_test.go`
-- [ ] T047 [P] [US2] Add integration test for password hash verification in `apps/finance-api/internal/auth/integration/password_security_test.go`
  - [X] T047 [P] [US2] Add integration test for password hash verification in `apps/finance-api/internal/auth/integration/password_security_test.go`
-- [ ] T048 [P] [US2] Add regression test for timing attack prevention in `apps/finance-api/internal/auth/integration/timing_attack_test.go`
-- [ ] T048A [P] [US2] Add integration test for database connection failure during authentication in `apps/finance-api/internal/auth/integration/db_failure_auth_test.go`
  - [X] T048 [P] [US2] Add regression test for timing attack prevention in `apps/finance-api/internal/auth/integration/timing_attack_test.go`
  - [X] T048A [P] [US2] Add integration test for database connection failure during authentication in `apps/finance-api/internal/auth/integration/db_failure_auth_test.go`
 
 ### Implementation for User Story 2
 
-- [ ] T049 [US2] Replace existing password hashing with Argon2id implementation in `apps/finance-api/internal/auth/security.go`
-- [ ] T050 [US2] Update user registration to use Argon2id hashing in `apps/finance-api/internal/auth/register_service.go`
-- [ ] T051 [US2] Update user login to use constant-time password comparison in `apps/finance-api/internal/auth/login_service.go`
  - [X] T045 [P] [US2] Add unit test for Argon2id password hashing in `apps/finance-api/internal/auth/security_test.go`
  - [X] T046 [P] [US2] Add unit test for constant-time password comparison in `apps/finance-api/internal/auth/security_test.go`
  - [X] T049 [US2] Replace existing password hashing with Argon2id implementation in `apps/finance-api/internal/auth/security.go`
  - [X] T050 [US2] Update user registration to use Argon2id hashing in `apps/finance-api/internal/auth/register_service.go`
  - [X] T051 [US2] Update user login to use constant-time password comparison in `apps/finance-api/internal/auth/login_service.go`
-- [ ] T052 [US2] Update password change functionality to invalidate old hashes in `apps/finance-api/internal/auth/password_service.go`
-- [ ] T053 [US2] Implement rate limiting for login attempts to prevent timing attacks in `apps/finance-api/internal/auth/rate_limiter.go`
  - [X] T052 [US2] Update password change functionality to invalidate old hashes in `apps/finance-api/internal/auth/password_service.go`
  - [X] T053 [US2] Implement rate limiting for login attempts to prevent timing attacks in `apps/finance-api/internal/auth/rate_limiter.go`
 
@@ -161,24 +138,15 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T054 [P] [US3] Add integration test for transaction rollback on failure in `apps/finance-api/internal/database/integration/transaction_rollback_test.go`
  - [X] T054 [P] [US3] Add integration test for transaction rollback on failure in `apps/finance-api/internal/database/integration/transaction_rollback_test.go`
-- [ ] T055 [P] [US3] Add integration test for atomic multi-table operations in `apps/finance-api/internal/database/integration/atomic_operations_test.go`
  - [X] T055 [P] [US3] Add integration test for atomic multi-table operations in `apps/finance-api/internal/database/integration/atomic_operations_test.go`
-- [ ] T056 [P] [US3] Add regression test for partial update prevention in `apps/finance-api/internal/database/integration/partial_update_test.go`
  - [X] T056 [P] [US3] Add regression test for partial update prevention in `apps/finance-api/internal/database/integration/partial_update_test.go`
 
 ### Implementation for User Story 3
 
-- [ ] T057 [US3] Wrap user registration in ACID transaction in `apps/finance-api/internal/auth/register_service.go`
-- [ ] T058 [US3] Wrap user login in ACID transaction in `apps/finance-api/internal/auth/login_service.go`
-- [ ] T059 [US3] Wrap user logout in ACID transaction in `apps/finance-api/internal/auth/login_service.go`
  - [X] T057 [US3] Wrap user registration in ACID transaction in `apps/finance-api/internal/auth/register_service.go`
  - [X] T058 [US3] Wrap user login in ACID transaction in `apps/finance-api/internal/auth/login_service.go`
  - [X] T059 [US3] Wrap user logout in ACID transaction in `apps/finance-api/internal/auth/login_service.go`
-- [ ] T060 [US3] Wrap account creation in ACID transaction in `apps/finance-api/internal/accounts/account_service.go`
-- [ ] T061 [US3] Wrap transaction creation in ACID transaction in `apps/finance-api/internal/transactions/transaction_service.go`
-- [ ] T062 [US3] Wrap budget creation in ACID transaction in `apps/finance-api/internal/budgets/budget_service.go`
  - [X] T060 [US3] Wrap account creation in ACID transaction in `apps/finance-api/internal/accounts/account_service.go`
  - [X] T061 [US3] Wrap transaction creation in ACID transaction in `apps/finance-api/internal/transactions/transaction_service.go`
  - [X] T062 [US3] Wrap budget creation in ACID transaction in `apps/finance-api/internal/budgets/budget_service.go`
@@ -197,38 +165,23 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T063 [P] [US4] Add unit test for structured logging middleware in `apps/finance-api/internal/http/middleware/logging_test.go`
-- [ ] T064 [P] [US4] Add integration test for correlation ID propagation in `apps/finance-api/internal/http/integration/correlation_propagation_test.go`
-- [ ] T065 [P] [US4] Add integration test for audit event generation in `apps/finance-api/internal/audit/integration/audit_event_test.go`
  - [X] T063 [P] [US4] Add unit test for structured logging middleware in `apps/finance-api/internal/http/middleware/logging_test.go`
  - [X] T064 [P] [US4] Add integration test for correlation ID propagation in `apps/finance-api/internal/http/integration/correlation_propagation_test.go`
  - [X] T065 [P] [US4] Add integration test for audit event generation in `apps/finance-api/internal/audit/integration/audit_event_test.go`
-- [ ] T066 [P] [US4] Add regression test for sensitive data logging prevention in `apps/finance-api/internal/http/integration/sensitive_logging_test.go`
-- [ ] T066A [P] [US4] Add integration test for audit event storage failure handling in `apps/finance-api/internal/audit/integration/audit_failure_test.go`
  - [X] T066 [P] [US4] Add regression test for sensitive data logging prevention in `apps/finance-api/internal/http/integration/sensitive_logging_test.go`
  - [X] T066A [P] [US4] Add integration test for audit event storage failure handling in `apps/finance-api/internal/audit/integration/audit_failure_test.go`
 
 ### Implementation for User Story 4
 
-- [ ] T067 [P] [US4] Create audit event repository implementation in `apps/finance-api/internal/audit/audit_repository.go`
  - [X] T067 [P] [US4] Create audit event repository implementation in `apps/finance-api/internal/audit/audit_repository.go`
-- [ ] T068 [US4] Implement audit event generation for user registration in `apps/finance-api/internal/auth/register_service.go`
-- [ ] T069 [US4] Implement audit event generation for user login in `apps/finance-api/internal/auth/login_service.go`
-- [ ] T070 [US4] Implement audit event generation for user logout in `apps/finance-api/internal/auth/login_service.go`
-- [ ] T071 [US4] Implement audit event generation for account creation in `apps/finance-api/internal/accounts/account_service.go`
-- [ ] T072 [US4] Implement audit event generation for transaction creation in `apps/finance-api/internal/transactions/transaction_service.go`
-- [ ] T073 [US4] Implement audit event generation for budget creation in `apps/finance-api/internal/budgets/budget_service.go`
  - [X] T068 [US4] Implement audit event generation for user registration in `apps/finance-api/internal/auth/register_service.go`
  - [X] T069 [US4] Implement audit event generation for user login in `apps/finance-api/internal/auth/login_service.go`
  - [X] T070 [US4] Implement audit event generation for user logout in `apps/finance-api/internal/auth/login_service.go`
  - [X] T071 [US4] Implement audit event generation for account creation in `apps/finance-api/internal/accounts/account_service.go`
  - [X] T072 [US4] Implement audit event generation for transaction creation in `apps/finance-api/internal/transactions/transaction_service.go`
  - [X] T073 [US4] Implement audit event generation for budget creation in `apps/finance-api/internal/budgets/budget_service.go`
-- [ ] T074 [US4] Ensure all log entries include required fields (timestamp, level, service, component, operation, request_id, correlation_id, user_id, session_id, duration, message)
  - [X] T074 [US4] Ensure all log entries include required fields (timestamp, level, service, component, operation, request_id, correlation_id, user_id, session_id, duration, message)
-- [ ] T075 [US4] Add X-Request-ID and X-Correlation-ID response headers to all API endpoints
  - [X] T075 [US4] Add X-Request-ID and X-Correlation-ID response headers to all API endpoints
-- [ ] T076 [US4] Implement append-only enforcement for audit records in `apps/finance-api/internal/audit/audit_repository.go`
  - [X] T076 [US4] Implement append-only enforcement for audit records in `apps/finance-api/internal/audit/audit_repository.go`
 
 **Checkpoint**: At this point, User Stories 1-4 should all work independently
@@ -245,10 +198,6 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T077 [P] [US5] Add contract test for CORS preflight handling in `apps/finance-api/internal/http/contract/cors_contract_test.go`
-- [ ] T078 [P] [US5] Add integration test for CORS headers in `apps/finance-api/internal/http/integration/cors_integration_test.go`
-- [ ] T079 [P] [US5] Add regression test for unauthorized origin rejection in `apps/finance-api/internal/http/integration/cors_security_test.go`
-- [ ] T079A [P] [US5] Add integration test for malformed/malicious CORS request handling in `apps/finance-api/internal/http/integration/cors_malicious_test.go`
  - [X] T077 [P] [US5] Add contract test for CORS preflight handling in `apps/finance-api/internal/http/contract/cors_contract_test.go`
  - [X] T078 [P] [US5] Add integration test for CORS headers in `apps/finance-api/internal/http/integration/cors_integration_test.go`
  - [X] T079 [P] [US5] Add regression test for unauthorized origin rejection in `apps/finance-api/internal/http/integration/cors_security_test.go`
@@ -256,10 +205,6 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 5
 
-- [ ] T080 [US5] Configure CORS origins, methods, headers, and credentials in `apps/finance-api/internal/http/middleware/cors.go`
-- [ ] T081 [US5] Ensure OPTIONS preflight requests return 200 status in `apps/finance-api/internal/http/middleware/cors.go`
-- [ ] T082 [US5] Make CORS origins configurable via environment variables in `apps/finance-api/internal/config/config.go`
-- [ ] T083 [US5] Test CORS configuration with localhost:3000 for development in `infra/docker-compose.yml`
  - [X] T080 [US5] Configure CORS origins, methods, headers, and credentials in `apps/finance-api/internal/http/middleware/cors.go`
  - [X] T081 [US5] Ensure OPTIONS preflight requests return 200 status in `apps/finance-api/internal/http/middleware/cors.go`
  - [X] T082 [US5] Make CORS origins configurable via environment variables in `apps/finance-api/internal/config/config.go`
@@ -279,9 +224,6 @@ description: "Task list template for feature implementation"
 
 > **NOTE: Write these tests FIRST, ensure them FAIL before implementation**
 
-- [ ] T079 [P] [US6] Add integration test for domain event generation in `apps/finance-api/internal/events/integration/domain_event_test.go`
-- [ ] T080 [P] [US6] Add integration test for transactional outbox atomicity in `apps/finance-api/internal/events/integration/outbox_atomicity_test.go`
-- [ ] T081 [P] [US6] Add regression test for event processing failure handling in `apps/finance-api/internal/events/integration/event_failure_test.go`
  - [X] T079 [P] [US6] Add integration test for domain event generation in `apps/finance-api/internal/events/integration/domain_event_test.go`
  - [X] T080 [P] [US6] Add integration test for transactional outbox atomicity in `apps/finance-api/internal/events/integration/outbox_atomicity_test.go`
  - [X] T081 [P] [US6] Add regression test for event processing failure handling in `apps/finance-api/internal/events/integration/event_failure_test.go`
@@ -298,7 +240,6 @@ description: "Task list template for feature implementation"
 - [X] T089 [US6] Implement domain event generation for BUDGET_CREATED in `apps/finance-api/internal/budgets/budget_service.go`
 - [X] T090 [US6] Implement outbox entry creation within same transaction as business operations in all relevant services
 - [X] T091 [US6] Create basic event processor skeleton for future consumer integration in `apps/finance-api/internal/events/event_processor.go`
-- [ ] T091A [US6] Implement retry logic with exponential backoff for failed event processing in `apps/finance-api/internal/events/event_processor.go`
  - [X] T091A [US6] Implement retry logic with exponential backoff for failed event processing in `apps/finance-api/internal/events/event_processor.go`
 
 **Checkpoint**: All user stories should now be independently functional

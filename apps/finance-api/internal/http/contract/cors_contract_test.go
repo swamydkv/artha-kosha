@@ -10,7 +10,7 @@ import (
 
 func TestCORSPreflightHandling(t *testing.T) {
 	// Tests that the CORS middleware handles OPTIONS requests properly
-	handler := mw.CorsMiddleware([]string{"*"}) (http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw.CorsMiddleware([]string{"*"})(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 

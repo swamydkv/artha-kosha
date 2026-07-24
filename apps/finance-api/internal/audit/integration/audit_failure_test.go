@@ -21,7 +21,7 @@ func TestAuditEventStorageFailureHandling(t *testing.T) {
 
 	// In this system, audit failures should not crash the business logic,
 	// but might just be logged, or if strict mode is enabled, it should return an error.
-	
+
 	evt := audit.AuditEvent{
 		ID:        "evt-test",
 		Timestamp: time.Now(),

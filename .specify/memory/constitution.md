@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.3.0 → 1.4.0
-- Modified principles: added session management requirements, observability and audit logging requirements, updated transactional outbox from optional to standard pattern, clarified session-based authentication during development
-- Added sections: Principle XII (Session Management), Principle XIII (Observability and Audit Logging)
+- Version change: 1.4.1 → 1.4.2
+- Modified principles: modified Test-Driven Development (Principle II) to prohibit TODO and placeholder tests.
+- Added sections: none
 - Removed sections: none
-- Templates requiring updates: spec-template.md ✅ updated to include session management and observability requirements, plan-template.md ✅ updated to include session management and observability in constitution check
+- Templates requiring updates: none
 - Follow-up TODOs: none
 -->
 
@@ -18,7 +18,7 @@ ArthaKosha is a private personal and family finance management platform for trac
 The approved specification is the source of truth. Every feature MUST follow the lifecycle: Specification → Clarification → Technical Plan → Tasks → Tests → Implementation → Review → Specification Conformance. Implementation MUST NOT diverge from the approved specification.
 
 ### II. Test-Driven Development
-Test-driven development is mandatory. Every feature MUST define acceptance criteria before implementation, create failing tests before production code, include unit and integration coverage, add regression tests for every defect fix, and pass all automated tests before merge. No production code MAY exist without corresponding automated tests.
+Test-driven development is mandatory. Every feature MUST define acceptance criteria before implementation, create failing tests before production code, include unit and integration coverage, add regression tests for every defect fix, and pass all automated tests before merge. No production code MAY exist without corresponding automated tests. The project mandates 100% statement coverage for all backend packages. Tests MUST NEVER be skipped using TODO, and placeholder tests are strictly prohibited.
 
 ### III. OpenAPI-First Development
 All REST APIs MUST be designed using OpenAPI before implementation. The OpenAPI specification is the API contract. Generated server types, request validation, and client SDKs MUST originate from the OpenAPI specification whenever practical.
@@ -120,7 +120,8 @@ A feature is complete only when all of the following are true:
 - Security requirements are implemented (Argon2id password hashing, CORS configuration).
 - Transactional outbox is implemented for state-changing operations.
 - Acceptance tests pass.
-- Unit tests pass.
+- Unit tests pass. Test implementations MUST thoroughly cover business logic and edge cases; tests MUST NEVER be left as TODO or simple placeholders. Code coverage expectation is exactly 100%.
+- A coverage report `docs/coverage.md` MUST be updated after every feature development. This report MUST strictly follow the file-wise, folder-wise, and repo-wise template representation, generated from actual coverage output.
 - Integration tests pass.
 - The implementation conforms to the approved specification.
 - Documentation is updated in the `docs/` folder as the final step of the feature lifecycle, reflecting the finalized architecture, user flow, call flow, and supporting design rationale.
@@ -135,4 +136,4 @@ All pull requests and design reviews MUST verify compliance with this constituti
 
 The constitution uses semantic versioning: MAJOR for backward-incompatible governance or principle removals, MINOR for new principles or materially expanded guidance, and PATCH for clarifications, wording fixes, and non-semantic refinements. The version line MUST reflect both the current release and the adoption dates.
 
-**Version**: 1.4.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-24
+**Version**: 1.4.1 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-24

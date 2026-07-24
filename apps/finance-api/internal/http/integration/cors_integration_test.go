@@ -2,16 +2,16 @@ package integration
 
 import (
 	"context"
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"artha-kosha/apps/finance-api/internal/auth"
 	"artha-kosha/apps/finance-api/internal/audit"
+	"artha-kosha/apps/finance-api/internal/auth"
 	router "artha-kosha/apps/finance-api/internal/http"
 )
 
 type mockAuditRepo struct{}
+
 func (m *mockAuditRepo) Insert(ctx context.Context, e audit.AuditEvent) error { return nil }
 
 func TestCORSHeadersIntegration(t *testing.T) {

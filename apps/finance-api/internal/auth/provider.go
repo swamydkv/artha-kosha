@@ -193,12 +193,18 @@ func (p *LocalAuthProvider) Register(req RegisterUserRequest) (RegisterUserRespo
 	}, nil
 }
 
+var dummyHashCache string
+
 func (p *LocalAuthProvider) Login(req LoginRequest) (LoginResponse, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	user, found := p.users[strings.ToLower(req.Username)]
 	if !found {
+		if dummyHashCache == "" {
+			dummyHashCache, _ = hashPassword("dummy")
+		}
+		_, _ = passwordMatches(req.Password, dummyHashCache)
 		return LoginResponse{}, errors.New("invalid credentials")
 	}
 	match, err := passwordMatches(req.Password, user.PasswordHash)

@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"errors"
 	"time"
 )
 
@@ -33,7 +34,18 @@ func (s *Service) CreateSession(id string, userID string, userAgent string, ip s
 }
 
 func (s *Service) GetSession(id string) (Session, error) {
-	return s.repo.Get(id)
+	sess, err := s.repo.Get(id)
+	if err != nil {
+		return Session{}, err
+	}
+	if sess.Status != StatusActive {
+		return Session{}, errors.New("session is not active")
+	}
+	// Check expiration
+	if time.Now().UTC().After(sess.ExpiresAt) {
+		return Session{}, errors.New("session expired")
+	}
+	return sess, nil
 }
 
 func (s *Service) RevokeSession(id string) error {

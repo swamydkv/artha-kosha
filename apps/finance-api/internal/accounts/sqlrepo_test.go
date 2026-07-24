@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/google/uuid"
 )
 
 func TestSQLRepository_CreateAccount(t *testing.T) {
@@ -14,15 +15,16 @@ func TestSQLRepository_CreateAccount(t *testing.T) {
 	}
 	defer db.Close()
 
-	mock.ExpectExec("INSERT INTO accounts").WithArgs(sqlmock.AnyArg(), "owner1", "My Account").WillReturnResult(sqlmock.NewResult(1, 1))
+	ownerID := uuid.New().String()
+	mock.ExpectExec("INSERT INTO accounts").WithArgs(sqlmock.AnyArg(), ownerID, "My Account").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	repo := NewSQLRepository(db)
-	req := CreateAccountRequest{OwnerID: "owner1", Name: "My Account"}
+	req := CreateAccountRequest{OwnerID: ownerID, Name: "My Account"}
 	acc, err := repo.CreateAccount(context.Background(), req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if acc == nil || acc.OwnerID != "owner1" {
+	if acc == nil || acc.OwnerID != ownerID {
 		t.Fatalf("unexpected account result: %#v", acc)
 	}
 

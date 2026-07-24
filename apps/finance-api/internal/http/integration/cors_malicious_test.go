@@ -2,22 +2,22 @@ package integration
 
 import (
 	"context"
-	"net/http"
 	"net/http/httptest"
-	"testing"
 	"os"
+	"testing"
 
-	"artha-kosha/apps/finance-api/internal/auth"
 	"artha-kosha/apps/finance-api/internal/audit"
+	"artha-kosha/apps/finance-api/internal/auth"
 	router "artha-kosha/apps/finance-api/internal/http"
 )
 
 type mockAuditRepoMalicious struct{}
+
 func (m *mockAuditRepoMalicious) Insert(ctx context.Context, e audit.AuditEvent) error { return nil }
 
 func TestMaliciousCORSRequestHandling(t *testing.T) {
 	os.Setenv("FINANCE_API_ALLOWED_ORIGINS", "http://allowed.com")
-	
+
 	provider := auth.NewLocalAuthProvider()
 	r := router.NewRouter(provider, &mockAuditRepoMalicious{})
 
@@ -33,6 +33,6 @@ func TestMaliciousCORSRequestHandling(t *testing.T) {
 	if w.Header().Get("Access-Control-Allow-Origin") != "" {
 		t.Error("Expected no CORS headers for malformed origin")
 	}
-	
+
 	os.Unsetenv("FINANCE_API_ALLOWED_ORIGINS")
 }

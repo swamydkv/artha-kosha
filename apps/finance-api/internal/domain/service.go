@@ -46,18 +46,8 @@ func (s *Service) EmitTx(ctx context.Context, tx *sql.Tx, e DomainEvent) error {
 	if e.Timestamp.IsZero() {
 		e.Timestamp = time.Now().UTC()
 	}
-	// attempt to use repository transaction insert
-	if inserter, ok := interface{}(s.repo).(interface {
-		InsertTx(context.Context, *sql.Tx, DomainEvent) error
-	}); ok {
-		if err := inserter.InsertTx(ctx, tx, e); err != nil {
-			return err
-		}
-	} else {
-		// fallback to non-transactional insert
-		if err := s.repo.Insert(ctx, e); err != nil {
-			return err
-		}
+	if err := s.repo.InsertTx(ctx, tx, e); err != nil {
+		return err
 	}
 
 	// prepare outbox entry
@@ -70,15 +60,8 @@ func (s *Service) EmitTx(ctx context.Context, tx *sql.Tx, e DomainEvent) error {
 		ProcessingStatus: "pending",
 	}
 
-	// best-effort: if outbox service's repository supports InsertTx, use that via an exported method on outbox package
-	if inserter, ok := interface{}(s.outbox).(interface {
-		EnqueueTx(context.Context, *sql.Tx, outbox.OutboxEntry) error
-	}); ok {
-		return inserter.EnqueueTx(ctx, tx, oe)
-	}
-
-	// fallback: use non-transactional enqueue (best-effort)
-	return s.outbox.Enqueue(ctx, oe)
+	// use transactional enqueue
+	return s.outbox.EnqueueTx(ctx, tx, oe)
 }
 
 func generateID(prefix string) string {

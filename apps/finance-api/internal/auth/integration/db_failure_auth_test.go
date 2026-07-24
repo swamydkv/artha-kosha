@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -12,19 +13,19 @@ import (
 // mockFailingRepo simulates a database connection failure for tests
 type mockFailingRepo struct{}
 
-func (m *mockFailingRepo) SaveSession(s sessions.Session) error {
-	return sessions.ErrSessionNotFound // Just return some error to simulate failure
+func (m *mockFailingRepo) Create(s sessions.Session) error {
+	return errors.New("db failure")
 }
-func (m *mockFailingRepo) GetSession(id string) (sessions.Session, error) {
-	return sessions.Session{}, sessions.ErrSessionNotFound
+func (m *mockFailingRepo) Get(id string) (sessions.Session, error) {
+	return sessions.Session{}, errors.New("not found")
 }
-func (m *mockFailingRepo) DeleteSession(id string) error {
+func (m *mockFailingRepo) Revoke(id string) error {
 	return nil
 }
-func (m *mockFailingRepo) DeleteAllUserSessions(userID string) error {
+func (m *mockFailingRepo) RevokeAllByUser(userID string) error {
 	return nil
 }
-func (m *mockFailingRepo) DeleteExpiredSessions() error {
+func (m *mockFailingRepo) UpdateActivity(id string, lastActivity time.Time) error {
 	return nil
 }
 
@@ -33,7 +34,7 @@ func TestDBFailureDuringAuthentication(t *testing.T) {
 	provider := auth.NewLocalAuthProviderWithRepo(&mockFailingRepo{}, 1*time.Hour)
 
 	// Since NewLocalAuthProviderWithRepo uses in-memory users, we can inject a user
-	// by first using a normal provider to register, then migrating the user over, 
+	// by first using a normal provider to register, then migrating the user over,
 	// but the easiest way is just to register directly (register doesn't use session repo, it only uses it for DB in real postgres).
 	// In the real implementation, NewLocalAuthProviderFromDSN is used for Postgres, but here we just mock the session repo failure.
 
@@ -61,7 +62,7 @@ func TestDBFailureDuringAuthentication(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected login to fail due to DB connection failure, but it succeeded")
 	}
-	
+
 	// The error returned should ideally obscure internal DB details or just be an internal server error.
 	if strings.Contains(err.Error(), "invalid credentials") {
 		t.Errorf("Expected internal error for DB failure, got invalid credentials")

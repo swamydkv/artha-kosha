@@ -57,4 +57,3 @@ func (s *Service) RecordTx(ctx context.Context, tx *sql.Tx, e AuditEvent) error 
 	// fallback to non-transactional insert
 	return s.repo.Insert(ctx, e)
 }
-
