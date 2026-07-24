@@ -129,6 +129,8 @@ description: "Task list template for feature implementation"
  - [X] T047 [P] [US2] Add integration test for password hash verification in `apps/finance-api/internal/auth/integration/password_security_test.go`
 - [ ] T048 [P] [US2] Add regression test for timing attack prevention in `apps/finance-api/internal/auth/integration/timing_attack_test.go`
 - [ ] T048A [P] [US2] Add integration test for database connection failure during authentication in `apps/finance-api/internal/auth/integration/db_failure_auth_test.go`
+ - [X] T048 [P] [US2] Add regression test for timing attack prevention in `apps/finance-api/internal/auth/integration/timing_attack_test.go`
+ - [X] T048A [P] [US2] Add integration test for database connection failure during authentication in `apps/finance-api/internal/auth/integration/db_failure_auth_test.go`
 
 ### Implementation for User Story 2
 
@@ -142,6 +144,8 @@ description: "Task list template for feature implementation"
  - [X] T051 [US2] Update user login to use constant-time password comparison in `apps/finance-api/internal/auth/login_service.go`
 - [ ] T052 [US2] Update password change functionality to invalidate old hashes in `apps/finance-api/internal/auth/password_service.go`
 - [ ] T053 [US2] Implement rate limiting for login attempts to prevent timing attacks in `apps/finance-api/internal/auth/rate_limiter.go`
+ - [X] T052 [US2] Update password change functionality to invalidate old hashes in `apps/finance-api/internal/auth/password_service.go`
+ - [X] T053 [US2] Implement rate limiting for login attempts to prevent timing attacks in `apps/finance-api/internal/auth/rate_limiter.go`
 
 **Checkpoint**: At this point, User Stories 1 and 2 should both work independently
 
@@ -162,6 +166,7 @@ description: "Task list template for feature implementation"
 - [ ] T055 [P] [US3] Add integration test for atomic multi-table operations in `apps/finance-api/internal/database/integration/atomic_operations_test.go`
  - [X] T055 [P] [US3] Add integration test for atomic multi-table operations in `apps/finance-api/internal/database/integration/atomic_operations_test.go`
 - [ ] T056 [P] [US3] Add regression test for partial update prevention in `apps/finance-api/internal/database/integration/partial_update_test.go`
+ - [X] T056 [P] [US3] Add regression test for partial update prevention in `apps/finance-api/internal/database/integration/partial_update_test.go`
 
 ### Implementation for User Story 3
 
@@ -200,20 +205,31 @@ description: "Task list template for feature implementation"
  - [X] T065 [P] [US4] Add integration test for audit event generation in `apps/finance-api/internal/audit/integration/audit_event_test.go`
 - [ ] T066 [P] [US4] Add regression test for sensitive data logging prevention in `apps/finance-api/internal/http/integration/sensitive_logging_test.go`
 - [ ] T066A [P] [US4] Add integration test for audit event storage failure handling in `apps/finance-api/internal/audit/integration/audit_failure_test.go`
+ - [X] T066 [P] [US4] Add regression test for sensitive data logging prevention in `apps/finance-api/internal/http/integration/sensitive_logging_test.go`
+ - [X] T066A [P] [US4] Add integration test for audit event storage failure handling in `apps/finance-api/internal/audit/integration/audit_failure_test.go`
 
 ### Implementation for User Story 4
 
 - [ ] T067 [P] [US4] Create audit event repository implementation in `apps/finance-api/internal/audit/audit_repository.go`
+ - [X] T067 [P] [US4] Create audit event repository implementation in `apps/finance-api/internal/audit/audit_repository.go`
 - [ ] T068 [US4] Implement audit event generation for user registration in `apps/finance-api/internal/auth/register_service.go`
 - [ ] T069 [US4] Implement audit event generation for user login in `apps/finance-api/internal/auth/login_service.go`
 - [ ] T070 [US4] Implement audit event generation for user logout in `apps/finance-api/internal/auth/login_service.go`
 - [ ] T071 [US4] Implement audit event generation for account creation in `apps/finance-api/internal/accounts/account_service.go`
 - [ ] T072 [US4] Implement audit event generation for transaction creation in `apps/finance-api/internal/transactions/transaction_service.go`
 - [ ] T073 [US4] Implement audit event generation for budget creation in `apps/finance-api/internal/budgets/budget_service.go`
+ - [X] T068 [US4] Implement audit event generation for user registration in `apps/finance-api/internal/auth/register_service.go`
+ - [X] T069 [US4] Implement audit event generation for user login in `apps/finance-api/internal/auth/login_service.go`
+ - [X] T070 [US4] Implement audit event generation for user logout in `apps/finance-api/internal/auth/login_service.go`
+ - [X] T071 [US4] Implement audit event generation for account creation in `apps/finance-api/internal/accounts/account_service.go`
+ - [X] T072 [US4] Implement audit event generation for transaction creation in `apps/finance-api/internal/transactions/transaction_service.go`
+ - [X] T073 [US4] Implement audit event generation for budget creation in `apps/finance-api/internal/budgets/budget_service.go`
 - [ ] T074 [US4] Ensure all log entries include required fields (timestamp, level, service, component, operation, request_id, correlation_id, user_id, session_id, duration, message)
+ - [X] T074 [US4] Ensure all log entries include required fields (timestamp, level, service, component, operation, request_id, correlation_id, user_id, session_id, duration, message)
 - [ ] T075 [US4] Add X-Request-ID and X-Correlation-ID response headers to all API endpoints
  - [X] T075 [US4] Add X-Request-ID and X-Correlation-ID response headers to all API endpoints
 - [ ] T076 [US4] Implement append-only enforcement for audit records in `apps/finance-api/internal/audit/audit_repository.go`
+ - [X] T076 [US4] Implement append-only enforcement for audit records in `apps/finance-api/internal/audit/audit_repository.go`
 
 **Checkpoint**: At this point, User Stories 1-4 should all work independently
 
@@ -233,6 +249,10 @@ description: "Task list template for feature implementation"
 - [ ] T078 [P] [US5] Add integration test for CORS headers in `apps/finance-api/internal/http/integration/cors_integration_test.go`
 - [ ] T079 [P] [US5] Add regression test for unauthorized origin rejection in `apps/finance-api/internal/http/integration/cors_security_test.go`
 - [ ] T079A [P] [US5] Add integration test for malformed/malicious CORS request handling in `apps/finance-api/internal/http/integration/cors_malicious_test.go`
+ - [X] T077 [P] [US5] Add contract test for CORS preflight handling in `apps/finance-api/internal/http/contract/cors_contract_test.go`
+ - [X] T078 [P] [US5] Add integration test for CORS headers in `apps/finance-api/internal/http/integration/cors_integration_test.go`
+ - [X] T079 [P] [US5] Add regression test for unauthorized origin rejection in `apps/finance-api/internal/http/integration/cors_security_test.go`
+ - [X] T079A [P] [US5] Add integration test for malformed/malicious CORS request handling in `apps/finance-api/internal/http/integration/cors_malicious_test.go`
 
 ### Implementation for User Story 5
 
@@ -240,6 +260,10 @@ description: "Task list template for feature implementation"
 - [ ] T081 [US5] Ensure OPTIONS preflight requests return 200 status in `apps/finance-api/internal/http/middleware/cors.go`
 - [ ] T082 [US5] Make CORS origins configurable via environment variables in `apps/finance-api/internal/config/config.go`
 - [ ] T083 [US5] Test CORS configuration with localhost:3000 for development in `infra/docker-compose.yml`
+ - [X] T080 [US5] Configure CORS origins, methods, headers, and credentials in `apps/finance-api/internal/http/middleware/cors.go`
+ - [X] T081 [US5] Ensure OPTIONS preflight requests return 200 status in `apps/finance-api/internal/http/middleware/cors.go`
+ - [X] T082 [US5] Make CORS origins configurable via environment variables in `apps/finance-api/internal/config/config.go`
+ - [X] T083 [US5] Test CORS configuration with localhost:3000 for development in `infra/docker-compose.yml`
 
 **Checkpoint**: At this point, User Stories 1-5 should all work independently
 
@@ -258,6 +282,9 @@ description: "Task list template for feature implementation"
 - [ ] T079 [P] [US6] Add integration test for domain event generation in `apps/finance-api/internal/events/integration/domain_event_test.go`
 - [ ] T080 [P] [US6] Add integration test for transactional outbox atomicity in `apps/finance-api/internal/events/integration/outbox_atomicity_test.go`
 - [ ] T081 [P] [US6] Add regression test for event processing failure handling in `apps/finance-api/internal/events/integration/event_failure_test.go`
+ - [X] T079 [P] [US6] Add integration test for domain event generation in `apps/finance-api/internal/events/integration/domain_event_test.go`
+ - [X] T080 [P] [US6] Add integration test for transactional outbox atomicity in `apps/finance-api/internal/events/integration/outbox_atomicity_test.go`
+ - [X] T081 [P] [US6] Add regression test for event processing failure handling in `apps/finance-api/internal/events/integration/event_failure_test.go`
 
 ### Implementation for User Story 6
 
@@ -272,6 +299,7 @@ description: "Task list template for feature implementation"
 - [X] T090 [US6] Implement outbox entry creation within same transaction as business operations in all relevant services
 - [X] T091 [US6] Create basic event processor skeleton for future consumer integration in `apps/finance-api/internal/events/event_processor.go`
 - [ ] T091A [US6] Implement retry logic with exponential backoff for failed event processing in `apps/finance-api/internal/events/event_processor.go`
+ - [X] T091A [US6] Implement retry logic with exponential backoff for failed event processing in `apps/finance-api/internal/events/event_processor.go`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -281,14 +309,14 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T098 [P] Update `docs/` with the finalized architecture, Mermaid diagrams, exact user flow, and call flow for the infrastructure modernization feature
-- [ ] T099 Run `quickstart.md` validation against `infra/docker-compose.yml`
-- [ ] T100 [P] Add final regression coverage for edge cases across all components in `apps/finance-api/internal/auth/integration/edge_cases_test.go`
-- [ ] T101 Verify performance thresholds and save benchmark evidence for session operations in `docs/`
-- [ ] T102 Add or update coverage-exception documentation where any file falls below 100% coverage after justified review
-- [ ] T103 Code cleanup and refactoring across shared modules
-- [ ] T104 Update OpenAPI specification to reflect all session management endpoints in `api/auth-api.yaml`
-- [ ] T105 Verify middleware chain order matches constitutional requirements in `apps/finance-api/internal/http/router.go`
+- [X] T098 [P] Update `docs/` with the finalized architecture, Mermaid diagrams, exact user flow, and call flow for the infrastructure modernization feature
+- [X] T099 Run `quickstart.md` validation against `infra/docker-compose.yml`
+- [X] T100 [P] Add final regression coverage for edge cases across all components in `apps/finance-api/internal/auth/integration/edge_cases_test.go`
+- [X] T101 Verify performance thresholds and save benchmark evidence for session operations in `docs/`
+- [X] T102 Add or update coverage-exception documentation where any file falls below 100% coverage after justified review
+- [X] T103 Code cleanup and refactoring across shared modules
+- [X] T104 Update OpenAPI specification to reflect all session management endpoints in `api/auth-api.yaml`
+- [X] T105 Verify middleware chain order matches constitutional requirements in `apps/finance-api/internal/http/router.go`
 
 > **Final Docs Rule**: Documentation updates in `docs/` MUST happen at the end of the feature lifecycle, after the implementation and verification steps are stable.
 

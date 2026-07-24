@@ -2,14 +2,14 @@
   "version": "0.12.15.dev0",
   "integration_state_schema": 1,
   "installed_integrations": [
-    "devin"
+    "agy"
   ],
   "integration_settings": {
-    "devin": {
+    "agy": {
       "script": "sh",
       "invoke_separator": "-"
     }
   },
-  "integration": "devin",
-  "default_integration": "devin"
+  "integration": "agy",
+  "default_integration": "agy"
 }

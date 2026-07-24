@@ -32,6 +32,16 @@ func LoggingMiddleware(service string) func(http.Handler) http.Handler {
 			reqID := r.Header.Get("X-Request-ID")
 			corrID := r.Header.Get("X-Correlation-ID")
 			ctx := WithLogger(r.Context(), l)
+			// try to extract user and session from context
+			userID := ""
+			sessionID := ""
+			if sess, ok := r.Context().Value("session_id").(string); ok {
+				sessionID = sess
+			}
+			if uid, ok := r.Context().Value("user_id").(string); ok {
+				userID = uid
+			}
+
 			// add basic fields
 			l.InfoContext(ctx, "request.started",
 				"service", service,
@@ -41,8 +51,19 @@ func LoggingMiddleware(service string) func(http.Handler) http.Handler {
 				"path", r.URL.Path,
 				"request_id", reqID,
 				"correlation_id", corrID,
+				"user_id", userID,
+				"session_id", sessionID,
 			)
 			next.ServeHTTP(w, r.WithContext(ctx))
+
+			// get possibly updated values
+			if sess, ok := r.Context().Value("session_id").(string); ok {
+				sessionID = sess
+			}
+			if uid, ok := r.Context().Value("user_id").(string); ok {
+				userID = uid
+			}
+
 			l.InfoContext(ctx, "request.finished",
 				"service", service,
 				"component", "http",
@@ -51,7 +72,9 @@ func LoggingMiddleware(service string) func(http.Handler) http.Handler {
 				"path", r.URL.Path,
 				"request_id", reqID,
 				"correlation_id", corrID,
-				"duration_ms", time.Since(start).Milliseconds(),
+				"user_id", userID,
+				"session_id", sessionID,
+				"duration", time.Since(start).Milliseconds(),
 			)
 		})
 	}

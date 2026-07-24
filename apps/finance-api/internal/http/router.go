@@ -2,6 +2,8 @@ package http
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -23,7 +25,11 @@ func NewRouter(provider auth.AuthProvider, auditRepo audit.Repository) http.Hand
 	r.Use(chimw.RequestID)
 	r.Use(mw.LoggingMiddleware("finance-api"))
 	r.Use(chimw.Recoverer)
-	r.Use(mw.CorsMiddleware(nil))
+	allowedOrigins := []string{}
+	if originsStr := os.Getenv("FINANCE_API_ALLOWED_ORIGINS"); originsStr != "" {
+		allowedOrigins = strings.Split(originsStr, ",")
+	}
+	r.Use(mw.CorsMiddleware(allowedOrigins))
 	r.Use(mw.TimeoutMiddleware(30 * time.Second))
 	r.Use(mw.AuditMiddleware(auditRepo))
 

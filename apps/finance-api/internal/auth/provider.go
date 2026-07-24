@@ -25,6 +25,7 @@ type AuthProvider interface {
 	Logout(string) error
 	GetSession(string) (sessions.Session, error)
 	RevokeAll(string) error
+	ChangePassword(ChangePasswordRequest) error
 }
 
 type RegisterUserRequest struct {
