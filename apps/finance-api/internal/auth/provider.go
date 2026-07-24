@@ -17,6 +17,7 @@ import (
 	"artha-kosha/apps/finance-api/internal/domain"
 	"artha-kosha/apps/finance-api/internal/sessions"
 	"artha-kosha/apps/finance-api/internal/transactions"
+	"artha-kosha/apps/finance-api/internal/users"
 )
 
 type AuthProvider interface {
@@ -77,6 +78,7 @@ type LocalAuthProvider struct {
 	mu          sync.RWMutex
 	users       map[string]*localUser
 	sessSvc     *sessions.Service
+	usersRepo   users.Repository
 	domainSvc   *domain.Service
 	auditSvc    *audit.Service
 	accountsSvc *accounts.Service
@@ -110,7 +112,12 @@ func NewLocalAuthProviderFromDSN(dsn string, ttl time.Duration) (*LocalAuthProvi
 		return nil, nil, err
 	}
 	svc := sessions.NewService(pg, ttl)
-	return &LocalAuthProvider{users: make(map[string]*localUser), sessSvc: svc}, pg, nil
+	uRepo := users.NewSQLRepository(pg.DB())
+	return &LocalAuthProvider{
+		users:     make(map[string]*localUser),
+		sessSvc:   svc,
+		usersRepo: uRepo,
+	}, pg, nil
 }
 
 // SetDomainService attaches a domain service to emit domain events for actions like register/login
@@ -136,6 +143,33 @@ func (p *LocalAuthProvider) Register(req RegisterUserRequest) (RegisterUserRespo
 		return RegisterUserResponse{}, err
 	}
 
+	passwordHash, err := hashPassword(req.Password)
+	if err != nil {
+		return RegisterUserResponse{}, fmt.Errorf("failed to hash password: %w", err)
+	}
+	firstName := firstNameFromFullName(req.FullName)
+
+	if p.usersRepo != nil {
+		dob, _ := time.Parse("2006-01-02", req.DateOfBirth)
+		user, err := p.usersRepo.CreateUser(context.Background(), users.CreateUserRequest{
+			FullName:     strings.TrimSpace(req.FullName),
+			DateOfBirth:  dob,
+			MobileNumber: strings.TrimSpace(req.MobileNumber),
+			Email:        strings.ToLower(req.Email),
+			Username:     strings.ToLower(req.Username),
+			PasswordHash: passwordHash,
+		})
+		if err != nil {
+			return RegisterUserResponse{}, err
+		}
+		return RegisterUserResponse{
+			UserID:       user.UserID,
+			Username:     user.Username,
+			PasswordHash: user.PasswordHash,
+			FirstName:    firstName,
+		}, nil
+	}
+
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -150,11 +184,6 @@ func (p *LocalAuthProvider) Register(req RegisterUserRequest) (RegisterUserRespo
 	}
 
 	userID := generateID("user")
-	passwordHash, err := hashPassword(req.Password)
-	if err != nil {
-		return RegisterUserResponse{}, fmt.Errorf("failed to hash password: %w", err)
-	}
-	firstName := firstNameFromFullName(req.FullName)
 	user := &localUser{
 		ID:           userID,
 		Username:     strings.ToLower(req.Username),
@@ -196,6 +225,31 @@ func (p *LocalAuthProvider) Register(req RegisterUserRequest) (RegisterUserRespo
 var dummyHashCache string
 
 func (p *LocalAuthProvider) Login(req LoginRequest) (LoginResponse, error) {
+	if p.usersRepo != nil {
+		user, err := p.usersRepo.GetUserByUsername(context.Background(), strings.ToLower(req.Username))
+		if err != nil {
+			if dummyHashCache == "" {
+				dummyHashCache, _ = hashPassword("dummy")
+			}
+			_, _ = passwordMatches(req.Password, dummyHashCache)
+			return LoginResponse{}, errors.New("invalid credentials")
+		}
+		match, err := passwordMatches(req.Password, user.PasswordHash)
+		if err != nil || !match {
+			return LoginResponse{}, errors.New("invalid credentials")
+		}
+		sessionID := generateID("session")
+		err = p.usersRepo.CreateSession(context.Background(), sessionID, user.UserID, "", "")
+		if err != nil {
+			return LoginResponse{}, err
+		}
+		return LoginResponse{
+			UserID:         user.UserID,
+			SessionID:      sessionID,
+			WelcomeMessage: fmt.Sprintf("Welcome, %s!", firstNameFromFullName(user.FullName)),
+		}, nil
+	}
+
 	p.mu.Lock()
 	defer p.mu.Unlock()
 

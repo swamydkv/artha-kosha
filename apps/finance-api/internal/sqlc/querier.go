@@ -6,6 +6,7 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -16,6 +17,7 @@ type Querier interface {
 	CheckUsernameExists(ctx context.Context, username string) (bool, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteExpiredSessions(ctx context.Context, expiresAt time.Time) error
 	FetchPendingDomainEvents(ctx context.Context, limit int32) ([]FetchPendingDomainEventsRow, error)
 	FetchPendingOutbox(ctx context.Context, limit int32) ([]FetchPendingOutboxRow, error)
 	GetAuditEventsByRequestID(ctx context.Context, requestID string) ([]AuditEvent, error)

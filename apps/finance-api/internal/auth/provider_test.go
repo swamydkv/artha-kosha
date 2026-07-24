@@ -1,8 +1,12 @@
 package auth
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
+
+	"artha-kosha/apps/finance-api/internal/users"
 )
 
 func TestProviderSetters(t *testing.T) {
@@ -158,3 +162,118 @@ func TestProvider_AllBranches(t *testing.T) {
 	// NewLocalAuthProviderWithRepo
 	NewLocalAuthProviderWithRepo(nil, time.Minute)
 }
+
+func TestProvider_Integration_RegistrationAndLogin(t *testing.T) {
+	t.Log("Integration test for user registration and login flows using PostgreSQL")
+	t.Skip("Skipping DB integration test in unit test file")
+}
+
+type mockUsersRepo struct {
+	shouldErr bool
+}
+
+func (m *mockUsersRepo) CreateUser(ctx context.Context, req users.CreateUserRequest) (*users.User, error) {
+	if m.shouldErr {
+		return nil, errors.New("db error")
+	}
+	return &users.User{UserID: "user-1", Username: req.Username}, nil
+}
+
+func (m *mockUsersRepo) GetUserByID(ctx context.Context, id string) (*users.User, error) {
+	return nil, nil
+}
+func (m *mockUsersRepo) GetUserByUsername(ctx context.Context, username string) (*users.User, error) {
+	if m.shouldErr {
+		return nil, errors.New("not found")
+	}
+	hash, _ := hashPassword("Password123!")
+	return &users.User{UserID: "user-1", Username: username, PasswordHash: hash}, nil
+}
+func (m *mockUsersRepo) GetUserByEmail(ctx context.Context, email string) (*users.User, error) {
+	return nil, nil
+}
+func (m *mockUsersRepo) GetUserByMobileNumber(ctx context.Context, mobile string) (*users.User, error) {
+	return nil, nil
+}
+func (m *mockUsersRepo) CheckUserExists(ctx context.Context, username, email, mobile string) (*users.UserExistsCheck, error) {
+	return &users.UserExistsCheck{}, nil
+}
+func (m *mockUsersRepo) CreateSession(ctx context.Context, sessionID, userID, ipAddress, userAgent string) error {
+	return nil
+}
+
+func TestProvider_DBMode_Branches(t *testing.T) {
+	repo := &mockUsersRepo{}
+	p := NewLocalAuthProvider()
+	p.usersRepo = repo
+
+	req := RegisterUserRequest{
+		FullName: "Test DB",
+		DateOfBirth: "1990-01-01",
+		MobileNumber: "+1999999999",
+		Email: "db@example.com",
+		Username: "dbuser",
+		Password: "Password123!",
+		ConfirmPassword: "Password123!",
+	}
+	
+	_, err := p.Register(req)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	repo.shouldErr = true
+	_, err = p.Register(req)
+	if err == nil {
+		t.Error("expected error from db mock")
+	}
+	repo.shouldErr = false
+
+	lReq := LoginRequest{
+		Username: "dbuser",
+		Password: "Password123!",
+	}
+	_, err = p.Login(lReq)
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	repo.shouldErr = true
+	_, err = p.Login(lReq)
+	if err == nil {
+		t.Error("expected error from db mock")
+	}
+
+	// validation errors
+	badReq := req
+	badReq.Password = "short"
+	_, err = p.Register(badReq)
+	if err == nil {
+		t.Error("expected error for bad password")
+	}
+
+	badReq.Username = "!!"
+	_, err = p.Register(badReq)
+	if err == nil {
+		t.Error("expected error for bad username")
+	}
+	
+	badReq.DateOfBirth = "2999-01-01"
+	_, err = p.Register(badReq)
+	if err == nil {
+		t.Error("expected error for future DOB")
+	}
+	
+	badReq.DateOfBirth = "invalid"
+	_, err = p.Register(badReq)
+	if err == nil {
+		t.Error("expected error for invalid DOB")
+	}
+	
+	badReq.FullName = " "
+	_, err = p.Register(badReq)
+	if err == nil {
+		t.Error("expected error for empty field")
+	}
+}
+

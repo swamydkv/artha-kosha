@@ -15,6 +15,7 @@ import (
 	"artha-kosha/apps/finance-api/internal/domain"
 	internalhttp "artha-kosha/apps/finance-api/internal/http"
 	"artha-kosha/apps/finance-api/internal/outbox"
+	"artha-kosha/apps/finance-api/internal/sessions"
 	"artha-kosha/apps/finance-api/internal/transactions"
 )
 
@@ -65,6 +66,9 @@ func main() {
 		// start outbox worker (use SQL repo and default processor)
 		w := outbox.NewWorker(outboxRepo, nil, 5*time.Second)
 		w.Start(context.Background())
+		// start session cleanup worker
+		sessionWorker := sessions.NewWorker(pgRepo, 24*time.Hour)
+		sessionWorker.Start(context.Background())
 		// pass auditRepo to router below
 	} else {
 		provider = auth.NewLocalAuthProvider()

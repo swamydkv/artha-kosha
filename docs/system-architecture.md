@@ -140,10 +140,10 @@ sequenceDiagram
     AuthSvc->>AuthSvc: Validate Input & Ensure uniqueness
     AuthSvc->>AuthSvc: Hash Password (Argon2id)
     
-    AuthSvc->>DB: Begin Tx
+    AuthSvc->>DB: Begin Tx (via usersRepo)
     AuthSvc->>DB: INSERT INTO users
     AuthSvc->>DB: INSERT INTO domain_events (UserRegistered)
-    AuthSvc->>DB: INSERT INTO transactional_outbox
+    AuthSvc->>DB: INSERT INTO audit_events (Action=register)
     AuthSvc->>DB: Commit Tx
     
     AuthSvc-->>API: Registration Success
@@ -166,15 +166,17 @@ sequenceDiagram
     Web->>API: POST /login
     API->>AuthSvc: Authenticate(credentials)
     
-    AuthSvc->>DB: Query User by Username
+    AuthSvc->>DB: Query User by Username (via usersRepo)
     DB-->>AuthSvc: Return User Record + Password Hash
     AuthSvc->>AuthSvc: Verify Argon2id Hash
     
-    AuthSvc->>SessSvc: CreateSession(userID, IP, UserAgent)
-    SessSvc->>DB: Begin Tx
-    SessSvc->>DB: INSERT INTO sessions (status = active)
-    SessSvc->>DB: Commit Tx
-    SessSvc-->>AuthSvc: Session Created
+    AuthSvc->>DB: CreateSession(userID) (via usersRepo)
+    DB->>DB: Begin Tx
+    DB->>DB: INSERT INTO sessions
+    DB->>DB: INSERT INTO domain_events (UserLoggedIn)
+    DB->>DB: INSERT INTO audit_events (Action=login)
+    DB->>DB: Commit Tx
+    DB-->>AuthSvc: Session Created
     
     AuthSvc-->>API: Login Success (Token/Session ID)
     API-->>Web: Set-Cookie: session_id (HttpOnly, Secure)

@@ -81,3 +81,6 @@ func (m *mockUserRepo) GetUserByEmail(ctx context.Context, email string) (*users
 func (m *mockUserRepo) GetUserByMobileNumber(ctx context.Context, mobile string) (*users.User, error) {
 	return nil, nil
 }
+func (m *mockUserRepo) CreateSession(ctx context.Context, sessionID, userID, ipAddress, userAgent string) error {
+	return nil
+}

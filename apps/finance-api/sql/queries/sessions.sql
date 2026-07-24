@@ -15,3 +15,6 @@ UPDATE sessions SET status = $1, revoked_at = $2 WHERE id = $3;
 
 -- name: RevokeAllSessionsByUser :exec
 UPDATE sessions SET status = $1, revoked_at = $2 WHERE user_id = $3;
+
+-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions WHERE expires_at < $1;

@@ -127,12 +127,12 @@ func (s *RegisterService) Register(ctx context.Context, req RegisterUserRequest)
 			}
 			return nil
 		}); err != nil {
-			return nil, errors.New("failed to create user")
+			return nil, err
 		}
 	} else {
 		u, err := s.userRepo.CreateUser(ctx, createReq)
 		if err != nil {
-			return nil, errors.New("failed to create user")
+			return nil, err
 		}
 		created = u
 	}

@@ -12,6 +12,9 @@ type Repository interface {
 	// GetUserByID retrieves a user by their ID
 	GetUserByID(ctx context.Context, userID string) (*User, error)
 
+	// CreateSession creates a session and records audit/domain events in one tx
+	CreateSession(ctx context.Context, sessionID, userID, ipAddress, userAgent string) error
+
 	// GetUserByUsername retrieves a user by their username
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 

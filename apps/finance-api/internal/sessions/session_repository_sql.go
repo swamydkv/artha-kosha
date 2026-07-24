@@ -83,3 +83,9 @@ func nullableTime(t time.Time) interface{} {
 	}
 	return t
 }
+
+func (r *PostgresRepo) DeleteExpired(ctx context.Context, before time.Time) error {
+	q := `DELETE FROM sessions WHERE expires_at < $1`
+	_, err := r.db.ExecContext(ctx, q, before)
+	return err
+}
