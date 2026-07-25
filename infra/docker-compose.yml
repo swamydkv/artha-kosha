@@ -10,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d artha_kosha"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
 
   finance-api:
     build:
@@ -22,7 +27,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   web:
     image: node:20-alpine
