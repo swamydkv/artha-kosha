@@ -16,6 +16,19 @@ erDiagram
         TEXT password_hash
         TIMESTAMPTZ created_at
         TIMESTAMPTZ updated_at
+        TIMESTAMPTZ deleted_at
+        BOOLEAN is_archived
+    }
+
+    archived_users {
+        UUID id PK
+        UUID original_user_id
+        TEXT full_name
+        DATE date_of_birth
+        TEXT mobile_number
+        TEXT email
+        TIMESTAMPTZ archived_at
+        TIMESTAMPTZ retention_expires_at
     }
 
     sessions {

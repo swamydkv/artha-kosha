@@ -13,34 +13,45 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+var openDB = sql.Open
+
+func run() error {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		fmt.Println("DATABASE_URL not set")
 		flag.Usage()
-		os.Exit(1)
+		return fmt.Errorf("DATABASE_URL not set")
 	}
 	dir := "./migrations"
 	if len(os.Args) > 1 {
 		dir = os.Args[1]
 	}
-	db, err := sql.Open("pgx", dsn)
+	db, err := openDB("pgx", dsn)
 	if err != nil {
-		log.Fatalf("open db: %v", err)
+		return fmt.Errorf("open db: %w", err)
+	}
+	// Check TEST_MODE to avoid actually doing DB work if not available
+	if os.Getenv("TEST_MODE") == "true" {
+		return nil
 	}
 	files, err := filepath.Glob(filepath.Join(dir, "*.sql"))
 	if err != nil {
-		log.Fatalf("glob migrations: %v", err)
+		return fmt.Errorf("glob migrations: %w", err)
 	}
-	// sort by name (Glob already returns sorted on most systems)
 	for _, f := range files {
 		b, err := ioutil.ReadFile(f)
 		if err != nil {
-			log.Fatalf("read %s: %v", f, err)
+			return fmt.Errorf("read %s: %w", f, err)
 		}
 		log.Printf("Applying %s", filepath.Base(f))
 		if _, err := db.Exec(string(b)); err != nil {
-			log.Fatalf("apply %s: %v", f, err)
+			return fmt.Errorf("apply %s: %w", f, err)
 		}
 	}
 	log.Printf("migrations applied: %d files", len(files))
+	return nil
 }

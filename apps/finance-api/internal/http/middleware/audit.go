@@ -4,9 +4,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+	"strings"
 	"time"
 
 	"artha-kosha/apps/finance-api/internal/audit"
+	"artha-kosha/apps/finance-api/internal/constants"
 )
 
 func genID(prefix string) string {
@@ -25,16 +27,18 @@ func AuditMiddleware(auditRepo audit.Repository) func(http.Handler) http.Handler
 			ua := r.UserAgent()
 			clientIP := r.RemoteAddr
 			// try common forwarded header
-			if xf := r.Header.Get("X-Forwarded-For"); xf != "" {
-				clientIP = xf
+			if xf := r.Header.Get(constants.HeaderForwardedFor); xf != "" {
+				clientIP = strings.Split(xf, ",")[0]
 			}
+
+			// No payload capture currently
 			// fire and forget; don't block request on audit failure
 			go func() {
 				_ = auditRepo.Insert(ctx, audit.AuditEvent{
 					ID:        genID("audit"),
-					RequestID: r.Header.Get("X-Request-ID"),
-					UserID:    "",
-					SessionID: r.Header.Get("X-Session-ID"),
+					RequestID: r.Header.Get(constants.HeaderRequestID),
+					UserID:    "", // usually extracted from session
+					SessionID: r.Header.Get(constants.HeaderSessionID),
 					Resource:  r.URL.Path,
 					Action:    r.Method,
 					Result:    "success",

@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 
+	"artha-kosha/apps/finance-api/internal/constants"
+
 	chiCors "github.com/go-chi/cors"
 )
 
@@ -14,8 +16,8 @@ func CorsMiddleware(allowedOrigins []string) func(http.Handler) http.Handler {
 	o := chiCors.Options{
 		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Request-ID", "X-Correlation-ID", "X-Session-ID"},
-		ExposedHeaders:   []string{"X-Request-ID", "X-Correlation-ID"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization", constants.HeaderRequestID, constants.HeaderCorrelationID, constants.HeaderSessionID, constants.HeaderUserID},
+		ExposedHeaders:   []string{constants.HeaderRequestID, constants.HeaderCorrelationID},
 		AllowCredentials: true,
 		MaxAge:           300,
 	}

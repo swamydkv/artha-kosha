@@ -15,6 +15,9 @@ type Repository interface {
 	// CreateSession creates a session and records audit/domain events in one tx
 	CreateSession(ctx context.Context, sessionID, userID, ipAddress, userAgent string) error
 
+	// DeleteUser deletes a user and handles data archiving
+	DeleteUser(ctx context.Context, userID string, archiveRetentionDays int) error
+
 	// GetUserByUsername retrieves a user by their username
 	GetUserByUsername(ctx context.Context, username string) (*User, error)
 

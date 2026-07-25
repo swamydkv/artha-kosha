@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"artha-kosha/apps/finance-api/internal/constants"
 	"log/slog"
 )
 
@@ -29,8 +30,8 @@ func LoggingMiddleware(service string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			reqID := r.Header.Get("X-Request-ID")
-			corrID := r.Header.Get("X-Correlation-ID")
+			reqID := r.Header.Get(constants.HeaderRequestID)
+			corrID := r.Header.Get(constants.HeaderCorrelationID)
 			ctx := WithLogger(r.Context(), l)
 			// try to extract user and session from context
 			userID := ""

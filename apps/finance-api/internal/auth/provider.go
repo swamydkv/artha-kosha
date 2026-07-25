@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+
 	"artha-kosha/apps/finance-api/internal/accounts"
 	"artha-kosha/apps/finance-api/internal/audit"
 	"artha-kosha/apps/finance-api/internal/budgets"
@@ -27,6 +29,7 @@ type AuthProvider interface {
 	GetSession(string) (sessions.Session, error)
 	RevokeAll(string) error
 	ChangePassword(ChangePasswordRequest) error
+	DeleteUser(userID string, confirmation string, archiveRetentionDays int) error
 }
 
 type RegisterUserRequest struct {
@@ -111,13 +114,17 @@ func NewLocalAuthProviderFromDSN(dsn string, ttl time.Duration) (*LocalAuthProvi
 	if err != nil {
 		return nil, nil, err
 	}
+	return NewLocalAuthProviderFromDB(pg, ttl), pg, nil
+}
+
+func NewLocalAuthProviderFromDB(pg *sessions.PostgresRepo, ttl time.Duration) *LocalAuthProvider {
 	svc := sessions.NewService(pg, ttl)
 	uRepo := users.NewSQLRepository(pg.DB())
 	return &LocalAuthProvider{
 		users:     make(map[string]*localUser),
 		sessSvc:   svc,
 		usersRepo: uRepo,
-	}, pg, nil
+	}
 }
 
 // SetDomainService attaches a domain service to emit domain events for actions like register/login
@@ -238,7 +245,7 @@ func (p *LocalAuthProvider) Login(req LoginRequest) (LoginResponse, error) {
 		if err != nil || !match {
 			return LoginResponse{}, errors.New("invalid credentials")
 		}
-		sessionID := generateID("session")
+		sessionID := uuid.New().String()
 		err = p.usersRepo.CreateSession(context.Background(), sessionID, user.UserID, "", "")
 		if err != nil {
 			return LoginResponse{}, err
@@ -310,6 +317,23 @@ func (p *LocalAuthProvider) GetSession(id string) (sessions.Session, error) {
 // RevokeAll revokes all sessions for a user
 func (p *LocalAuthProvider) RevokeAll(userID string) error {
 	return p.sessSvc.RevokeAll(userID)
+}
+
+// DeleteUser performs a GDPR soft-delete
+func (p *LocalAuthProvider) DeleteUser(userID string, confirmation string, archiveRetentionDays int) error {
+	if confirmation != "DELETE" {
+		return errors.New("confirmation must be exactly 'DELETE'")
+	}
+	if p.usersRepo == nil {
+		return errors.New("delete user not supported in memory mode")
+	}
+	err := p.usersRepo.DeleteUser(context.Background(), userID, archiveRetentionDays)
+	if err != nil {
+		return err
+	}
+	// Revoke all sessions so the user is immediately logged out
+	_ = p.RevokeAll(userID)
+	return nil
 }
 
 func validateRegistrationRequest(req RegisterUserRequest) error {

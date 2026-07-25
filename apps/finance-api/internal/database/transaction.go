@@ -7,7 +7,7 @@ import (
 )
 
 // WithTx runs fn within a DB transaction. Commits on success, rolls back on error.
-func WithTx(ctx context.Context, db *sql.DB, fn func(*sql.Tx) error) error {
+var WithTx = func(ctx context.Context, db *sql.DB, fn func(*sql.Tx) error) error {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)

@@ -8,7 +8,7 @@ import (
 )
 
 func TestRegisterService(t *testing.T) {
-	svc := NewRegisterService(&mockProvider{}, &mockUserRepo{})
+	svc := NewRegisterService(&mockAuthProvider{}, &mockUserRepo{})
 	svc.SetDomainService(nil)
 	svc.SetAuditService(nil)
 
@@ -40,7 +40,7 @@ func TestRegisterService(t *testing.T) {
 
 func TestRegisterServiceWithDB(t *testing.T) {
     db, mock, _ := sqlmock.New()
-    svc := NewRegisterServiceWithDB(&mockProvider{}, &mockUserRepo{}, db)
+    svc := NewRegisterServiceWithDB(&mockAuthProvider{}, &mockUserRepo{}, db)
     if svc == nil {
         t.Error("expected svc to be created")
     }
@@ -82,5 +82,8 @@ func (m *mockUserRepo) GetUserByMobileNumber(ctx context.Context, mobile string)
 	return nil, nil
 }
 func (m *mockUserRepo) CreateSession(ctx context.Context, sessionID, userID, ipAddress, userAgent string) error {
+	return nil
+}
+func (m *mockUserRepo) DeleteUser(ctx context.Context, userID string, archiveRetentionDays int) error {
 	return nil
 }

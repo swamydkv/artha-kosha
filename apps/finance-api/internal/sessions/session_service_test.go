@@ -24,7 +24,7 @@ func TestService_GetSession(t *testing.T) {
 	svc := NewService(repo, time.Hour)
 
 	sess, _ := svc.CreateSession("1", "u1", "agent1", "127.0.0.1")
-	
+
 	got, err := svc.GetSession(sess.ID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

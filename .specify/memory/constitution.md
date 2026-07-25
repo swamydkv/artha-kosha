@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.1 → 1.4.2
-- Modified principles: modified Test-Driven Development (Principle II) to prohibit TODO and placeholder tests.
+- Version change: 1.6.0 → 1.7.0
+- Modified principles: Modified Development Workflow & Definition of Done to mandate ER diagram updates on data model changes, and system architecture document updates on flow changes.
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates: none
@@ -121,10 +121,14 @@ A feature is complete only when all of the following are true:
 - Transactional outbox is implemented for state-changing operations.
 - Acceptance tests pass.
 - Unit tests pass. Test implementations MUST thoroughly cover business logic and edge cases; tests MUST NEVER be left as TODO or simple placeholders. Code coverage expectation is exactly 100%.
-- A coverage report `docs/coverage.md` MUST be updated after every feature development. This report MUST strictly follow the file-wise, folder-wise, and repo-wise template representation, generated from actual coverage output.
+- A coverage report `docs/coverage.md` MUST be updated after every feature development. This report MUST strictly follow the file-wise, folder-wise, and repo-wise template representation. It MUST append data for every run in a historical log or table to track progression or regression over time, rather than overwriting previous results.
 - Integration tests pass.
+- Performance benchmarks MUST be run after every feature completion, and the results MUST be appended to the corresponding report in the `docs/` directory in a historical table to track performance trends across runs.
 - The implementation conforms to the approved specification.
-- Documentation is updated in the `docs/` folder as the final step of the feature lifecycle, reflecting the finalized architecture, user flow, call flow, and supporting design rationale.
+- Documentation is updated in the `docs/` folder as the final step of the feature lifecycle. This MUST include:
+  - Finalizing architecture details, user flows, and call flows.
+  - Mandatorily updating the Entity-Relationship (ER) diagram (`docs/er-diagram.md` or equivalent) whenever there is a change in the data model.
+  - Mandatorily updating `docs/system-architecture.md` whenever new flows, components, or data paradigms are introduced.
 
 The normal delivery workflow MUST be specification-driven, contract-driven, test-driven, migration-driven, and documentation-finalized. Feature specifications MUST contain the exact user flow and call flow for the feature using Mermaid diagrams. All architecture, user-flow, and workflow artifacts MUST be represented in Mermaid. Documentation updates in the `docs/` folder MUST occur after implementation details have stabilized and MUST reflect the final architecture, not draft or exploratory structure.
 
@@ -136,4 +140,4 @@ All pull requests and design reviews MUST verify compliance with this constituti
 
 The constitution uses semantic versioning: MAJOR for backward-incompatible governance or principle removals, MINOR for new principles or materially expanded guidance, and PATCH for clarifications, wording fixes, and non-semantic refinements. The version line MUST reflect both the current release and the adoption dates.
 
-**Version**: 1.4.1 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-24
+**Version**: 1.7.0 | **Ratified**: 2026-07-13 | **Last Amended**: 2026-07-25

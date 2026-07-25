@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"testing"
+	"time"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -33,4 +34,24 @@ func TestLoadConfig(t *testing.T) {
 	// Clean up
 	os.Unsetenv("PORT")
 	os.Unsetenv("FINANCE_API_ALLOWED_ORIGINS")
+
+	// Test getEnvInt
+	os.Setenv("INT_VAR", "42")
+	if v := getEnvInt("INT_VAR", 10); v != 42 {
+		t.Errorf("expected 42, got %d", v)
+	}
+	os.Setenv("INT_VAR", "invalid")
+	if v := getEnvInt("INT_VAR", 10); v != 10 {
+		t.Errorf("expected 10, got %d", v)
+	}
+
+	// Test getEnvDuration
+	os.Setenv("DUR_VAR", "10s")
+	if v := getEnvDuration("DUR_VAR", time.Second); v != 10*time.Second {
+		t.Errorf("expected 10s, got %v", v)
+	}
+	os.Setenv("DUR_VAR", "invalid")
+	if v := getEnvDuration("DUR_VAR", time.Second); v != time.Second {
+		t.Errorf("expected 1s, got %v", v)
+	}
 }

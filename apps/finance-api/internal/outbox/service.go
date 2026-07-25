@@ -102,3 +102,8 @@ func (r *SQLRepository) MarkFailed(ctx context.Context, id string, reason string
 	_, err := r.db.ExecContext(ctx, `UPDATE transactional_outbox SET processing_status = 'failed', last_error = $2, processed_at = NOW() WHERE id = $1`, id, reason)
 	return err
 }
+
+func (r *SQLRepository) DeleteProcessed(ctx context.Context, retentionDays int) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM transactional_outbox WHERE processing_status = 'processed' AND processed_at < NOW() - $1 * INTERVAL '1 day'`, retentionDays)
+	return err
+}

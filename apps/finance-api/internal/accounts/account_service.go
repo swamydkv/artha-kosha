@@ -27,11 +27,15 @@ type Repository interface {
 	CreateAccount(ctx context.Context, req CreateAccountRequest) (*Account, error)
 }
 
+type DomainEmitter interface {
+	EmitTx(ctx context.Context, tx *sql.Tx, e domain.DomainEvent) error
+}
+
 type Service struct {
 	repo   Repository
 	db     *sql.DB
 	audit  *audit.Service
-	domain *domain.Service
+	domain DomainEmitter
 }
 
 func NewService(repo Repository) *Service {
@@ -43,7 +47,7 @@ func NewServiceWithDB(repo Repository, db *sql.DB) *Service {
 }
 
 func (s *Service) SetAuditService(a *audit.Service)   { s.audit = a }
-func (s *Service) SetDomainService(d *domain.Service) { s.domain = d }
+func (s *Service) SetDomainService(d DomainEmitter) { s.domain = d }
 
 func (s *Service) CreateAccount(ctx context.Context, req CreateAccountRequest) (*Account, error) {
 	if s.db != nil {

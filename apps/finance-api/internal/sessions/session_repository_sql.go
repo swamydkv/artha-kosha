@@ -27,6 +27,10 @@ func NewPostgresRepo(dsn string) (*PostgresRepo, error) {
 	return &PostgresRepo{db: db}, nil
 }
 
+func NewPostgresRepoFromDB(db *sql.DB) *PostgresRepo {
+	return &PostgresRepo{db: db}
+}
+
 // DB exposes the underlying *sql.DB for integration tasks (migration/worker).
 func (r *PostgresRepo) DB() *sql.DB { return r.db }
 

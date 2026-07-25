@@ -3,8 +3,9 @@ package middleware
 import (
 	"context"
 	"net/http"
-
 	"github.com/google/uuid"
+
+	"artha-kosha/apps/finance-api/internal/constants"
 )
 
 type requestIDKey struct{}
@@ -39,18 +40,18 @@ func GetCorrelationID(ctx context.Context) string {
 // RequestIDMiddleware ensures every request has X-Request-ID and X-Correlation-ID headers
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqID := r.Header.Get("X-Request-ID")
+		reqID := r.Header.Get(constants.HeaderRequestID)
 		if reqID == "" {
 			reqID = uuid.NewString()
 		}
-		corrID := r.Header.Get("X-Correlation-ID")
+		corrID := r.Header.Get(constants.HeaderCorrelationID)
 		if corrID == "" {
 			corrID = reqID
 		}
 
 		// set headers on response for clients
-		w.Header().Set("X-Request-ID", reqID)
-		w.Header().Set("X-Correlation-ID", corrID)
+		w.Header().Set(constants.HeaderRequestID, reqID)
+		w.Header().Set(constants.HeaderCorrelationID, corrID)
 
 		ctx := r.Context()
 		ctx = WithRequestID(ctx, reqID)

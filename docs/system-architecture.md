@@ -205,6 +205,32 @@ sequenceDiagram
     Web-->>User: Redirect to Public Home/Login
 ```
 
+### D. GDPR Account Deletion (Archival)
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Web
+    participant API
+    participant UserSvc as User Service
+    participant DB as PostgreSQL
+
+    User->>Web: Confirm Delete ("DELETE") in Danger Zone
+    Web->>API: DELETE /user/account
+    API->>UserSvc: DeleteAccount(userID)
+    
+    UserSvc->>DB: Begin Tx
+    UserSvc->>DB: INSERT INTO archived_users (Original PII)
+    UserSvc->>DB: UPDATE users SET is_archived=true, email=UUID, full_name='GDPR-Deleted'
+    UserSvc->>DB: UPDATE sessions SET status='revoked'
+    UserSvc->>DB: INSERT INTO domain_events (UserDeleted)
+    UserSvc->>DB: Commit Tx
+    
+    UserSvc-->>API: Deletion Success
+    API-->>Web: Clear-Cookie & 200 OK
+    Web-->>User: Redirect to Public Home
+```
+
 ---
 
 ## 4. Key Architectural Patterns Employed

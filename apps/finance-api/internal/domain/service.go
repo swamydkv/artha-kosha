@@ -6,9 +6,7 @@ import (
 	"time"
 
 	"artha-kosha/apps/finance-api/internal/outbox"
-	"crypto/rand"
-	"encoding/hex"
-	"fmt"
+	"github.com/google/uuid"
 )
 
 type Service struct {
@@ -30,7 +28,7 @@ func (s *Service) Emit(ctx context.Context, e DomainEvent) error {
 	}
 	// enqueue outbox entry linking to domain event
 	oe := outbox.OutboxEntry{
-		ID:               generateID("outbox"),
+		ID:               uuid.New().String(),
 		DomainEventID:    e.ID,
 		EventType:        e.EventType,
 		Payload:          e.EventData,
@@ -52,7 +50,7 @@ func (s *Service) EmitTx(ctx context.Context, tx *sql.Tx, e DomainEvent) error {
 
 	// prepare outbox entry
 	oe := outbox.OutboxEntry{
-		ID:               generateID("outbox"),
+		ID:               uuid.New().String(),
 		DomainEventID:    e.ID,
 		EventType:        e.EventType,
 		Payload:          e.EventData,
@@ -64,8 +62,3 @@ func (s *Service) EmitTx(ctx context.Context, tx *sql.Tx, e DomainEvent) error {
 	return s.outbox.EnqueueTx(ctx, tx, oe)
 }
 
-func generateID(prefix string) string {
-	buf := make([]byte, 8)
-	_, _ = rand.Read(buf)
-	return fmt.Sprintf("%s-%s", prefix, hex.EncodeToString(buf))
-}

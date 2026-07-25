@@ -8,6 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"artha-kosha/apps/finance-api/internal/auth"
+	"artha-kosha/apps/finance-api/internal/config"
+	"artha-kosha/apps/finance-api/internal/constants"
 )
 
 func RegisterAuthHandlers(r chi.Router, provider auth.AuthProvider) {
@@ -56,13 +58,13 @@ func RegisterAuthHandlers(r chi.Router, provider auth.AuthProvider) {
 	})
 
 	r.Post("/logout", func(w http.ResponseWriter, req *http.Request) {
-		_ = provider.Logout(strings.TrimSpace(req.Header.Get("X-Session-ID")))
+		_ = provider.Logout(strings.TrimSpace(req.Header.Get(constants.HeaderSessionID)))
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"message":"logged out"}`))
 	})
 
 	r.Get("/session", func(w http.ResponseWriter, req *http.Request) {
-		sessionID := strings.TrimSpace(req.Header.Get("X-Session-ID"))
+		sessionID := strings.TrimSpace(req.Header.Get(constants.HeaderSessionID))
 		if sessionID == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -78,7 +80,7 @@ func RegisterAuthHandlers(r chi.Router, provider auth.AuthProvider) {
 	})
 
 	r.Delete("/session/revoke", func(w http.ResponseWriter, req *http.Request) {
-		sessionID := strings.TrimSpace(req.Header.Get("X-Session-ID"))
+		sessionID := strings.TrimSpace(req.Header.Get(constants.HeaderSessionID))
 		if sessionID == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -89,7 +91,7 @@ func RegisterAuthHandlers(r chi.Router, provider auth.AuthProvider) {
 	})
 
 	r.Delete("/sessions", func(w http.ResponseWriter, req *http.Request) {
-		userID := strings.TrimSpace(req.Header.Get("X-User-ID"))
+		userID := strings.TrimSpace(req.Header.Get(constants.HeaderUserID))
 		if userID == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -97,5 +99,37 @@ func RegisterAuthHandlers(r chi.Router, provider auth.AuthProvider) {
 		_ = provider.RevokeAll(userID)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"message":"all sessions revoked"}`))
+	})
+
+	r.Delete("/user/account", func(w http.ResponseWriter, req *http.Request) {
+		userID := strings.TrimSpace(req.Header.Get(constants.HeaderUserID))
+		if userID == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		var body struct {
+			Confirmation string `json:"confirmation"`
+		}
+		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error":"invalid request body"}`))
+			return
+		}
+
+		cfg := config.Load()
+		err := provider.DeleteUser(userID, body.Confirmation, cfg.ArchiveRetentionDays)
+		if err != nil {
+			if err.Error() == "confirmation must be exactly 'DELETE'" {
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"error":"` + err.Error() + `"}`))
+				return
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(`{"error":"failed to delete account"}`))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"message":"account deleted successfully"}`))
 	})
 }

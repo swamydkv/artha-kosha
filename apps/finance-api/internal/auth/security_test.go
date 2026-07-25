@@ -43,3 +43,20 @@ func TestPasswordMatches_FailureAndTiming(t *testing.T) {
 		t.Fatalf("passwordMatches calls took too long")
 	}
 }
+
+func BenchmarkHashPassword(b *testing.B) {
+	pw := "Str0ngP@ssw0rd!"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = hashPassword(pw)
+	}
+}
+
+func BenchmarkPasswordMatches(b *testing.B) {
+	pw := "Str0ngP@ssw0rd!"
+	h, _ := hashPassword(pw)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = passwordMatches(pw, h)
+	}
+}
