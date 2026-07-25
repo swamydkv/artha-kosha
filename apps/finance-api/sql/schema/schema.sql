@@ -4,7 +4,7 @@
 CREATE TYPE session_status AS ENUM ('active','expired','revoked');
 CREATE TYPE audit_result AS ENUM ('success','failure');
 CREATE TYPE domain_event_type AS ENUM (
-    'USER_REGISTERED', 'USER_LOGGED_IN', 'USER_LOGGED_OUT', 'ACCOUNT_CREATED', 'TRANSACTION_CREATED', 'BUDGET_CREATED'
+    'USER_REGISTERED', 'USER_LOGGED_IN', 'USER_LOGGED_OUT', 'USER_DELETED', 'ACCOUNT_CREATED', 'TRANSACTION_CREATED', 'BUDGET_CREATED'
 );
 CREATE TYPE processing_status AS ENUM ('pending','processed','failed');
 

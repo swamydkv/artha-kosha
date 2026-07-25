@@ -63,12 +63,13 @@ func (r *SQLRepository) CreateUser(ctx context.Context, req CreateUserRequest) (
 
 	// Insert domain event
 	dePayload, _ := json.Marshal(map[string]interface{}{
-		"user_id":    row.UserID.String(),
-		"username":   row.Username,
-		"timestamp":  time.Now().UTC().Format(time.RFC3339),
+		"user_id":   row.UserID.String(),
+		"username":  row.Username,
+		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
+	deID := uuid.New()
 	err = qtx.InsertDomainEvent(ctx, sqlc.InsertDomainEventParams{
-		ID:               uuid.New(),
+		ID:               deID,
 		EventType:        sqlc.DomainEventTypeUSERREGISTERED,
 		AggregateID:      row.UserID.String(),
 		AggregateType:    "user",
@@ -79,6 +80,19 @@ func (r *SQLRepository) CreateUser(ctx context.Context, req CreateUserRequest) (
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create domain event: %w", err)
+	}
+
+	err = qtx.InsertOutboxEntry(ctx, sqlc.InsertOutboxEntryParams{
+		ID:               uuid.New(),
+		DomainEventID:    deID,
+		EventType:        string(sqlc.DomainEventTypeUSERREGISTERED),
+		Payload:          dePayload,
+		CreatedAt:        time.Now().UTC(),
+		ProcessingStatus: sqlc.ProcessingStatusPending,
+		RetryCount:       0,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create outbox entry: %w", err)
 	}
 
 	// Insert audit event
@@ -165,7 +179,7 @@ func (r *SQLRepository) CreateSession(ctx context.Context, sessionID, userID, ip
 	if ipAddress != "" {
 		_ = ip.Scan(ipAddress)
 	}
-	
+
 	err = qtx.CreateSession(ctx, sqlc.CreateSessionParams{
 		ID:             sid,
 		UserID:         uid,
@@ -219,4 +233,88 @@ func (r *SQLRepository) CreateSession(ctx context.Context, sessionID, userID, ip
 		return fmt.Errorf("commit tx: %w", err)
 	}
 	return nil
+}
+
+func (r *SQLRepository) DeleteUser(ctx context.Context, userID string, archiveRetentionDays int) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user id: %w", err)
+	}
+	now := time.Now().UTC()
+	retentionExpiresAt := now.AddDate(0, 0, archiveRetentionDays)
+
+	var u User
+	err = tx.QueryRowContext(ctx, "SELECT username, email, full_name, mobile_number, password_hash FROM users WHERE user_id = $1 AND is_archived = false", uid).Scan(&u.Username, &u.Email, &u.FullName, &u.MobileNumber, &u.PasswordHash)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("user not found or already archived")
+		}
+		return fmt.Errorf("fetch user: %w", err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO archived_users (original_user_id, username, email, name, mobile, password_hash, retention_expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`, uid, u.Username, u.Email, u.FullName, u.MobileNumber, u.PasswordHash, retentionExpiresAt)
+	if err != nil {
+		return fmt.Errorf("insert archived user: %w", err)
+	}
+
+	dePayload, _ := json.Marshal(map[string]interface{}{
+		"user_id":              uid.String(),
+		"username":             u.Username,
+		"email":                u.Email,
+		"deleted_at":           now.Format(time.RFC3339),
+		"retention_expires_at": retentionExpiresAt.Format(time.RFC3339),
+	})
+	deID := uuid.New()
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO domain_events (id, event_type, aggregate_id, aggregate_type, event_data, timestamp, processing_status, retry_count)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, deID, sqlc.DomainEventTypeUSERDELETED, uid.String(), "user", dePayload, now, sqlc.ProcessingStatusPending, 0)
+	if err != nil {
+		return fmt.Errorf("create domain event: %w", err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO transactional_outbox (id, domain_event_id, event_type, payload, created_at, processing_status, retry_count)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+	`, uuid.New(), deID, string(sqlc.DomainEventTypeUSERDELETED), dePayload, now, sqlc.ProcessingStatusPending, 0)
+	if err != nil {
+		return fmt.Errorf("create outbox entry: %w", err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO audit_events (id, request_id, user_id, session_id, resource, resource_id, action, result, timestamp)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	`, uuid.New(), "system", uuid.NullUUID{UUID: uid, Valid: true}, uuid.NullUUID{}, "user", sql.NullString{String: uid.String(), Valid: true}, "USER_DELETED", sqlc.AuditResultSuccess, now)
+	if err != nil {
+		return fmt.Errorf("create audit event: %w", err)
+	}
+
+	scrambled := fmt.Sprintf("deleted_user_%s", uid.String()[:8])
+	_, err = tx.ExecContext(ctx, `
+		UPDATE users
+		SET username = $2, email = $2, full_name = $2, mobile_number = $2, password_hash = '', is_archived = true, deleted_at = NOW()
+		WHERE user_id = $1
+	`, uid, scrambled)
+	if err != nil {
+		return fmt.Errorf("update user: %w", err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit tx: %w", err)
+	}
+	return nil
+}
+
+func (r *SQLRepository) PruneArchivedUsers(ctx context.Context) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM archived_users WHERE retention_expires_at < NOW()`)
+	return err
 }

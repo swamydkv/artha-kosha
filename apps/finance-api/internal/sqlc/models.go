@@ -63,6 +63,7 @@ const (
 	DomainEventTypeUSERREGISTERED     DomainEventType = "USER_REGISTERED"
 	DomainEventTypeUSERLOGGEDIN       DomainEventType = "USER_LOGGED_IN"
 	DomainEventTypeUSERLOGGEDOUT      DomainEventType = "USER_LOGGED_OUT"
+	DomainEventTypeUSERDELETED        DomainEventType = "USER_DELETED"
 	DomainEventTypeACCOUNTCREATED     DomainEventType = "ACCOUNT_CREATED"
 	DomainEventTypeTRANSACTIONCREATED DomainEventType = "TRANSACTION_CREATED"
 	DomainEventTypeBUDGETCREATED      DomainEventType = "BUDGET_CREATED"
